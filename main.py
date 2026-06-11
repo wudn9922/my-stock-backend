@@ -19,7 +19,7 @@ def analyze_stock(ticker: str, ma1: int = 20, ma2: int = 60):
     try:
         print(f"🔄 正在幫你抓取股票資料: {ticker}")
         stock = yf.Ticker(ticker)
-        df = stock.history(period="1mo") # 確保抓取足夠計算均線的歷史資料
+        df = stock.history(period="3mo") # 確保抓取足夠計算均線的歷史資料
         
         if len(df) < max(ma1, ma2):
             df = stock.history(period="6mo")
