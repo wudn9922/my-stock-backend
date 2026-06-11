@@ -22,7 +22,7 @@ def analyze_stock(ticker: str, ma1: int = 20, ma2: int = 60):
         df = stock.history(period="1mo") # 確保抓取足夠計算均線的歷史資料
         
         if len(df) < max(ma1, ma2):
-            df = stock.history(period="3mo")
+            df = stock.history(period="6mo")
             
         if df.empty:
             raise HTTPException(status_code=400, detail="找不到該股票代碼，台股請確保有加 .TW")
