@@ -9,16 +9,13 @@
         body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; color: #333; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block; margin: 10px; min-width: 300px; vertical-align: top; }
         img { border-radius: 50%; width: 60px; height: 60px; margin-bottom: 10px; }
-        
         .form-group { margin: 15px 0; text-align: left; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
         .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; box-sizing: border-box; }
         .ma-container { display: flex; gap: 6px; }
         .ma-container input { text-align: center; }
-        
-        .btn { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
+        .btn { background-color: #007bff; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 10px; }
         .btn:disabled { background-color: #ccc; cursor: not-allowed; }
-        
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
         th { background-color: #007bff; color: white; }
@@ -33,7 +30,7 @@
     </div>
 
     <div class="card">
-        <h3>➕ 新增觀察股票</h3>
+        <h3>➕ 新增/修改觀察股票</h3>
         
         <div class="form-group">
             <label>設定報告歸類組別</label>
@@ -41,19 +38,16 @@
                 <option value="核心權值精選">🇹🇼 核心權值精選 (台股)</option>
                 <option value="航運與指標ETF">🇹🇼 航運與指標ETF (台股)</option>
                 <option value="AI與半導體">🇺🇸 AI與半導體 (美股)</option>
-                <option value="科技旗艦巨頭">🇺🇸 科技旗艦巨頭 (美股)</option>
-                <option value="特斯拉特選">🇺🇸 特斯拉特選 (美股)</option>
-                <option value="亞馬遜消費成長">🇺🇸 亞馬遜消費成長 (美股)</option>
             </select>
         </div>
 
         <div class="form-group">
             <label>股票代碼 (台股請加 .TW)</label>
-            <input type="text" id="ticker-input" placeholder="例如: 2330.TW 或 NVDA" value="2330.TW">
+            <input type="text" id="ticker-input" placeholder="例如: 2330.TW" value="2330.TW">
         </div>
 
         <div class="form-group">
-            <label>自訂均線天數 (留空或填0代表不使用)</label>
+            <label>這檔股票的獨立自訂均線 (留空或填0代表不使用)</label>
             <div class="ma-container">
                 <input type="number" id="ma1-input" value="5" placeholder="MA 1">
                 <input type="number" id="ma2-input" value="10" placeholder="MA 2">
@@ -62,7 +56,7 @@
             </div>
         </div>
         
-        <button class="btn" id="add-btn" onclick="addStock()">加入我的清單</button>
+        <button class="btn" id="add-btn" onclick="addStock()">加入/更新我的清單</button>
     </div>
 
     <br>
@@ -74,7 +68,7 @@
                 <tr>
                     <th>股票代碼</th>
                     <th>目前價格</th>
-                    <th>各均線現況</th>
+                    <th>該股自訂均線</th>
                     <th>多空判定 (計分)</th>
                 </tr>
             </thead>
@@ -99,38 +93,30 @@
                         <h4>你好，${profile.displayName}</h4>
                     `;
                 }
-            } catch (err) {
-                console.log("LIFF 初始化跳過");
-            }
+            } catch (err) { console.log("LIFF 初始化跳過"); }
         }
 
         async function addStock() {
             const groupName = document.getElementById("group-input").value; 
             const ticker = document.getElementById("ticker-input").value.trim();
-            
-            // 讀取 4 個欄位，若空白則帶入 0
             const ma1 = document.getElementById("ma1-input").value || 0;
             const ma2 = document.getElementById("ma2-input").value || 0;
             const ma3 = document.getElementById("ma3-input").value || 0;
             const ma4 = document.getElementById("ma4-input").value || 0;
             
-            if(!ticker) {
-                alert("請輸入股票代碼！");
-                return;
-            }
+            if(!ticker) { alert("請輸入股票代碼！"); return; }
             
             const btn = document.getElementById("add-btn");
-            btn.innerText = "大腦計算中...";
+            btn.innerText = "大腦計算與同步中...";
             btn.disabled = true;
             
             try {
-                // 將 4 條均線參數一併送給後端
                 const url = `https://my-stock-backend-bp8u.onrender.com/api/analyze?ticker=${ticker}&ma1=${ma1}&ma2=${ma2}&ma3=${ma3}&ma4=${ma4}&group_name=${encodeURIComponent(groupName)}`;
                 const response = await fetch(url);
                 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    alert(errorData.detail || "抓取失敗，請檢查代碼或均線參數");
+                    alert(errorData.detail || "抓取失敗");
                     return;
                 }
                 
@@ -139,10 +125,7 @@
                 const emptyRow = document.getElementById("empty-row");
                 if (emptyRow) emptyRow.remove();
                 
-                const tableBody = document.getElementById("stock-table-body");
-                const newRow = document.createElement("tr");
-                
-                // 處理動態均線文字呈現
+                // 動態組裝均線 HTML
                 let maText = "";
                 const maRes = data.ma_results;
                 for (let i = 1; i <= 4; i++) {
@@ -151,31 +134,45 @@
                     }
                 }
                 
-                // 根據狀態設定顏色
-                let statusColor = "#ffc107"; // 預設黃色 (多空不明)
+                let statusColor = "#ffc107";
                 if (data.status.includes("🟢")) statusColor = "#28a745";
                 if (data.status.includes("🔴")) statusColor = "#dc3545";
                 
-                newRow.innerHTML = `
+                const tableBody = document.getElementById("stock-table-body");
+                
+                // 🟢 智慧防重邏輯：檢查畫面上是否已有這檔股票
+                const rowId = `row-${data.ticker}`;
+                const existingRow = document.getElementById(rowId);
+                
+                const rowHTML = `
                     <td><b>${data.ticker}</b></td>
                     <td>$${data.latest_price}</td>
                     <td style="padding: 8px 12px;">${maText}</td>
                     <td style="color: ${statusColor}; font-weight: bold; font-size: 15px;">${data.status}</td>
                 `;
                 
-                tableBody.appendChild(newRow);
+                if (existingRow) {
+                    // 🔄 原地覆寫更新，不增加新行
+                    existingRow.innerHTML = rowHTML;
+                    console.log(`UI 已原地更新 ${data.ticker} 的資料`);
+                } else {
+                    // ➕ 沒出現過，才新增一行
+                    const newRow = document.createElement("tr");
+                    newRow.id = rowId; // 綁定 ID 方便下次尋找
+                    newRow.innerHTML = rowHTML;
+                    tableBody.appendChild(newRow);
+                }
                 
             } catch (err) {
                 console.error(err);
-                alert("連線失敗，請確認 Render 後端是否正常運作中。");
+                alert("連線失敗，請確認後端狀態。");
             } finally {
-                btn.innerText = "加入我的清單";
+                btn.innerText = "加入/更新我的清單";
                 btn.disabled = false;
             }
         }
 
         window.onload = initializeLiff;
     </script>
-
 </body>
 </html>
