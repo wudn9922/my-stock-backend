@@ -33,11 +33,9 @@
         <h3>➕ 新增/修改觀察股票</h3>
         
         <div class="form-group">
-            <label>設定報告歸類組別</label>
+            <label>設定報告歸類組別 (已同步雲端)</label>
             <select id="group-input">
-                <option value="核心權值精選">🇹🇼 核心權值精選 (台股)</option>
-                <option value="航運與指標ETF">🇹🇼 航運與指標ETF (台股)</option>
-                <option value="AI與半導體">🇺🇸 AI與半導體 (美股)</option>
+                <option value="">載入組別中...</option>
             </select>
         </div>
 
@@ -82,6 +80,7 @@
 
     <script>
         const LIFF_ID = "2010330411-SbwvRXRN";
+        const BACKEND_URL = "https://my-stock-backend-bp8u.onrender.com";
 
         async function initializeLiff() {
             try {
@@ -94,6 +93,35 @@
                     `;
                 }
             } catch (err) { console.log("LIFF 初始化跳過"); }
+            
+            // LIFF 初始化完後，立刻去撈真實組別
+            await loadRealGroups();
+        }
+
+        // 🟢 智慧功能：動態跟資料庫要你「原本的組別」
+        async function loadRealGroups() {
+            const select = document.getElementById("group-input");
+            try {
+                const response = await fetch(`${BACKEND_URL}/api/groups`);
+                if (response.ok) {
+                    const data = await response.json();
+                    select.innerHTML = ""; // 清空
+                    
+                    if (data.groups && data.groups.length > 0) {
+                        data.groups.forEach(groupName => {
+                            const opt = document.createElement("option");
+                            opt.value = groupName;
+                            opt.innerText = groupName;
+                            select.appendChild(opt);
+                        });
+                    } else {
+                        select.innerHTML = '<option value="預設觀察組">預設觀察組 (請先至資料庫建立組別)</option>';
+                    }
+                }
+            } catch (err) {
+                console.error("無法載入雲端組別:", err);
+                select.innerHTML = '<option value="核心權值精選">連線失敗，暫用預設組別</option>';
+            }
         }
 
         async function addStock() {
@@ -105,13 +133,14 @@
             const ma4 = document.getElementById("ma4-input").value || 0;
             
             if(!ticker) { alert("請輸入股票代碼！"); return; }
+            if(!groupName) { alert("請選擇組別！"); return; }
             
             const btn = document.getElementById("add-btn");
             btn.innerText = "大腦計算與同步中...";
             btn.disabled = true;
             
             try {
-                const url = `https://my-stock-backend-bp8u.onrender.com/api/analyze?ticker=${ticker}&ma1=${ma1}&ma2=${ma2}&ma3=${ma3}&ma4=${ma4}&group_name=${encodeURIComponent(groupName)}`;
+                const url = `${BACKEND_URL}/api/analyze?ticker=${ticker}&ma1=${ma1}&ma2=${ma2}&ma3=${ma3}&ma4=${ma4}&group_name=${encodeURIComponent(groupName)}`;
                 const response = await fetch(url);
                 
                 if (!response.ok) {
@@ -125,7 +154,6 @@
                 const emptyRow = document.getElementById("empty-row");
                 if (emptyRow) emptyRow.remove();
                 
-                // 動態組裝均線 HTML
                 let maText = "";
                 const maRes = data.ma_results;
                 for (let i = 1; i <= 4; i++) {
@@ -139,8 +167,6 @@
                 if (data.status.includes("🔴")) statusColor = "#dc3545";
                 
                 const tableBody = document.getElementById("stock-table-body");
-                
-                // 🟢 智慧防重邏輯：檢查畫面上是否已有這檔股票
                 const rowId = `row-${data.ticker}`;
                 const existingRow = document.getElementById(rowId);
                 
@@ -152,13 +178,10 @@
                 `;
                 
                 if (existingRow) {
-                    // 🔄 原地覆寫更新，不增加新行
                     existingRow.innerHTML = rowHTML;
-                    console.log(`UI 已原地更新 ${data.ticker} 的資料`);
                 } else {
-                    // ➕ 沒出現過，才新增一行
                     const newRow = document.createElement("tr");
-                    newRow.id = rowId; // 綁定 ID 方便下次尋找
+                    newRow.id = rowId;
                     newRow.innerHTML = rowHTML;
                     tableBody.appendChild(newRow);
                 }
