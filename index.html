@@ -1,87 +1,3 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的專屬量化清單</title>
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; color: #333; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); display: inline-block; margin: 10px; min-width: 300px; vertical-align: top; }
-        img { border-radius: 50%; width: 60px; height: 60px; margin-bottom: 10px; }
-        code { background: #eee; padding: 3px 6px; border-radius: 4px; color: #d63384; font-size: 14px; }
-        
-        .form-group { margin: 15px 0; text-align: left; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        .form-group input, .form-group select { width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
-        .btn { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; }
-        .btn:disabled { background-color: #ccc; cursor: not-allowed; }
-        
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-        th { background-color: #007bff; color: white; }
-    </style>
-</head>
-<body>
-
-    <h2>📊 我的專屬量化看盤室</h2>
-    
-    <div class="card" id="profile-card">
-        <p>ℹ️ 本地測試模式（未登入 LINE）</p>
-    </div>
-
-    <div class="card">
-        <h3>➕ 新增觀察股票</h3>
-        
-        <div class="form-group">
-            <label>設定報告歸類組別</label>
-            <select id="group-input">
-                <option value="核心權值精選">🇹🇼 核心權值精選 (台股)</option>
-                <option value="航運與指標ETF">🇹🇼 航運與指標ETF (台股)</option>
-                <option value="AI與半導體">🇺🇸 AI與半導體 (美股)</option>
-                <option value="科技旗艦巨頭">🇺🇸 科技旗艦巨頭 (美股)</option>
-                <option value="特斯拉特選">🇺🇸 特斯拉特選 (美股)</option>
-                <option value="亞馬遜消費成長">🇺🇸 亞馬遜消費成長 (美股)</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>股票代碼 (台股請加 .TW)</label>
-            <input type="text" id="ticker-input" placeholder="例如: 2330.TW 或 NVDA" value="2330.TW">
-        </div>
-        <div class="form-group">
-            <label>短期均線天數 (MA 1)</label>
-            <input type="number" id="ma1-input" value="20">
-        </div>
-        <div class="form-group">
-            <label>長期均線天數 (MA 2)</label>
-            <input type="number" id="ma2-input" value="60">
-        </div>
-        <button class="btn" id="add-btn" onclick="addStock()">加入我的清單</button>
-    </div>
-
-    <br>
-
-    <div class="card" style="width: 90%; max-width: 650px;">
-        <h3>📋 我的自訂觀察清單</h3>
-        <table>
-            <thead>
-                <tr>
-                    <th>股票代碼</th>
-                    <th>目前價格</th>
-                    <th>短均狀態</th>
-                    <th>長均狀態</th>
-                    <th>多空判定</th>
-                </tr>
-            </thead>
-            <tbody id="stock-table-body">
-                <tr id="empty-row">
-                    <td colspan="5" style="color: gray;">目前清單空空如也，請從上方新增股票</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-
     <script>
         const LIFF_ID = "2010330411-SbwvRXRN";
 
@@ -101,7 +17,7 @@
         }
 
         async function addStock() {
-            const groupName = document.getElementById("group-input").value; // 🟢 讀取分組名稱
+            const groupName = document.getElementById("group-input").value; 
             const ticker = document.getElementById("ticker-input").value.trim();
             const ma1 = document.getElementById("ma1-input").value;
             const ma2 = document.getElementById("ma2-input").value;
@@ -116,7 +32,7 @@
             btn.disabled = true;
             
             try {
-                # 🟢 核心改動：將 group_name 參數一併帶給後端大腦
+                // 🟢 修正：使用正確的 JS 註解，發送請求給 Render 後端
                 const response = await fetch(`https://my-stock-backend-bp8u.onrender.com/api/analyze?ticker=${ticker}&ma1=${ma1}&ma2=${ma2}&group_name=${encodeURIComponent(groupName)}`);
                 
                 if (!response.ok) {
@@ -158,6 +74,3 @@
 
         window.onload = initializeLiff;
     </script>
-
-</body>
-</html>
