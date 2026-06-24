@@ -22,23 +22,17 @@ def analyze_stock(ticker: str, ma1: int = 0, ma2: int = 0, ma3: int = 0, ma4: in
     try:
         print(f"🔄 正在幫你抓取股票資料: {ticker}")
         
-        # 🟢 1. 過濾出有輸入且大於 0 的有效均線
         active_mas = [ma for ma in [ma1, ma2, ma3, ma4] if ma and ma > 0]
         if not active_mas:
             raise HTTPException(status_code=400, detail="請至少輸入一條大於 0 的均線天數！")
         
         stock = yf.Ticker(ticker)
-        
-        # 根據最大的均線天數動態決定抓取歷史資料範圍
         max_ma = max(active_mas)
-        if max_ma <= 60:
-            period = "6mo"
-        elif max_ma <= 120:
-            period = "1y"
-        elif max_ma <= 240:
-            period = "2y"
-        else:
-            period = "5y"
+        
+        if max_ma <= 60: period = "6mo"
+        elif max_ma <= 120: period = "1y"
+        elif max_ma <= 240: period = "2y"
+        else: period = "5y"
             
         df = stock.history(period=period)
         if df.empty:
@@ -47,7 +41,6 @@ def analyze_stock(ticker: str, ma1: int = 0, ma2: int = 0, ma3: int = 0, ma4: in
         df = df.dropna(subset=['Close'])
         latest_price = round(df['Close'].iloc[-1], 2)
 
-        # 🟢 2. 計分制多空邏輯核心
         score = 0
         ma_results = {}
         
@@ -62,25 +55,18 @@ def analyze_stock(ticker: str, ma1: int = 0, ma2: int = 0, ma3: int = 0, ma4: in
                 ma_results[f"ma{i}"] = ma
                 ma_results[f"ma{i}_val"] = ma_val
                 
-                # 股價在均線上 +1，在均線下 -1
-                if latest_price > ma_val:
-                    score += 1
-                elif latest_price < ma_val:
-                    score -= 1
+                if latest_price > ma_val: score += 1
+                elif latest_price < ma_val: score -= 1
             else:
                 ma_results[f"ma{i}"] = 0
                 ma_results[f"ma{i}_val"] = None
 
-        # 🟢 3. 根據總分判定多空趨勢
-        if score > 0:
-            status = f"🟢 多頭趨勢 (得分: +{score})"
-        elif score < 0:
-            status = f"🔴 空頭趨勢 (得分: {score})"
-        else:
-            status = f"🟡 多空不明 (得分: 0)"
+        if score > 0: status = f"🟢 多頭趨勢 (得分: +{score})"
+        elif score < 0: status = f"🔴 空頭趨勢 (得分: {score})"
+        else: status = f"🟡 多空不明 (得分: 0)"
 
         # =========================================================================
-        # 📡 同步將資料存入 Supabase 雲端資料庫
+        # 📡 同步將資料存入 Supabase 雲端資料庫 (智慧覆寫邏輯 Upsert)
         # =========================================================================
         try:
             formatted_ticker = ticker.strip().upper()
@@ -91,24 +77,35 @@ def analyze_stock(ticker: str, ma1: int = 0, ma2: int = 0, ma3: int = 0, ma4: in
                 "Prefer": "return=representation"
             }
             
-            group_data = {"name": group_name, "ma1": ma1, "ma2": ma2, "ma3": ma3, "ma4": ma4}
-            
+            # 1. 處理組別 (組別現在單純只存名字)
             group_res = requests.get(f"{SUPABASE_URL}/groups?name=eq.{group_name}", headers=headers, timeout=5)
             if group_res.status_code == 200 and group_res.json():
                 group_id = group_res.json()[0]['id']
-                requests.patch(f"{SUPABASE_URL}/groups?id=eq.{group_id}", json=group_data, headers=headers, timeout=5)
             else:
-                ins_res = requests.post(f"{SUPABASE_URL}/groups", json=group_data, headers=headers, timeout=5)
+                ins_res = requests.post(f"{SUPABASE_URL}/groups", json={"name": group_name}, headers=headers, timeout=5)
                 group_id = ins_res.json()[0]['id']
                 
+            # 2. 智慧判斷：這檔股票在該組別是否已存在？
             stock_res = requests.get(f"{SUPABASE_URL}/stocks?ticker=eq.{formatted_ticker}&group_id=eq.{group_id}", headers=headers, timeout=5)
-            if stock_res.status_code == 200 and not stock_res.json():
-                new_stock = {"ticker": formatted_ticker, "group_id": group_id}
-                requests.post(f"{SUPABASE_URL}/stocks", json=new_stock, headers=headers, timeout=5)
-                print(f"🚀 雲端同步成功：{formatted_ticker} 已綁定至 【{group_name}】")
+            
+            stock_payload = {
+                "ticker": formatted_ticker, 
+                "group_id": group_id,
+                "ma1": ma1, "ma2": ma2, "ma3": ma3, "ma4": ma4 # 🟢 均線改存到股票身上！
+            }
+            
+            if stock_res.status_code == 200 and stock_res.json():
+                # 🔄 存在：用 PATCH 覆寫該檔股票的均線參數，避免產生兩個台積電
+                stock_id = stock_res.json()[0]['id']
+                requests.patch(f"{SUPABASE_URL}/stocks?id=eq.{stock_id}", json=stock_payload, headers=headers, timeout=5)
+                print(f"🚀 雲端覆寫成功：{formatted_ticker} 均線參數已更新")
+            else:
+                # ➕ 不存在：用 POST 新增一筆
+                requests.post(f"{SUPABASE_URL}/stocks", json=stock_payload, headers=headers, timeout=5)
+                print(f"🚀 雲端新增成功：{formatted_ticker} 已加入資料庫")
                 
         except Exception as db_err:
-            print(f"⚠️ Supabase 背景同步失敗（請確認欄位是否補齊），原因: {db_err}")
+            print(f"⚠️ Supabase 寫入失敗，原因: {db_err}")
         # =========================================================================
 
         return {
@@ -118,7 +115,5 @@ def analyze_stock(ticker: str, ma1: int = 0, ma2: int = 0, ma3: int = 0, ma4: in
             "ma_results": ma_results,
             "score": score
         }
-    except HTTPException as he:
-        raise he
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except HTTPException as he: raise he
+    except Exception as e: raise HTTPException(status_code=500, detail=str(e))
