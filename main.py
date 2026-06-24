@@ -17,6 +17,23 @@ app.add_middleware(
 SUPABASE_URL = "https://bxhqpfeberqbtxymghyt.supabase.co/rest/v1"
 SUPABASE_KEY = "sb_publishable_eEJNM_96jblQ_90vpcYC0g_PzyGJNOK"
 
+# 🟢 新增：讓前端網頁可以撈取你 Supabase 裡面「原本就有的所有組別」
+@app.get("/api/groups")
+def get_all_groups():
+    try:
+        headers = {
+            "apikey": SUPABASE_KEY,
+            "Authorization": f"Bearer {SUPABASE_KEY}"
+        }
+        res = requests.get(f"{SUPABASE_URL}/groups?select=name", headers=headers, timeout=5)
+        if res.status_code == 200:
+            # 移除重複的組別名稱
+            names = list(set([item['name'] for item in res.json() if item.get('name')]))
+            return {"groups": names}
+        return {"groups": []}
+    except Exception as e:
+        return {"groups": []}
+
 @app.get("/api/analyze")
 def analyze_stock(ticker: str, ma1: int = 0, ma2: int = 0, ma3: int = 0, ma4: int = 0, group_name: str = "核心權值精選"):
     try:
@@ -65,9 +82,6 @@ def analyze_stock(ticker: str, ma1: int = 0, ma2: int = 0, ma3: int = 0, ma4: in
         elif score < 0: status = f"🔴 空頭趨勢 (得分: {score})"
         else: status = f"🟡 多空不明 (得分: 0)"
 
-        # =========================================================================
-        # 📡 同步將資料存入 Supabase 雲端資料庫 (智慧覆寫邏輯 Upsert)
-        # =========================================================================
         try:
             formatted_ticker = ticker.strip().upper()
             headers = {
@@ -77,7 +91,6 @@ def analyze_stock(ticker: str, ma1: int = 0, ma2: int = 0, ma3: int = 0, ma4: in
                 "Prefer": "return=representation"
             }
             
-            # 1. 處理組別 (組別現在單純只存名字)
             group_res = requests.get(f"{SUPABASE_URL}/groups?name=eq.{group_name}", headers=headers, timeout=5)
             if group_res.status_code == 200 and group_res.json():
                 group_id = group_res.json()[0]['id']
@@ -85,28 +98,22 @@ def analyze_stock(ticker: str, ma1: int = 0, ma2: int = 0, ma3: int = 0, ma4: in
                 ins_res = requests.post(f"{SUPABASE_URL}/groups", json={"name": group_name}, headers=headers, timeout=5)
                 group_id = ins_res.json()[0]['id']
                 
-            # 2. 智慧判斷：這檔股票在該組別是否已存在？
             stock_res = requests.get(f"{SUPABASE_URL}/stocks?ticker=eq.{formatted_ticker}&group_id=eq.{group_id}", headers=headers, timeout=5)
             
             stock_payload = {
                 "ticker": formatted_ticker, 
                 "group_id": group_id,
-                "ma1": ma1, "ma2": ma2, "ma3": ma3, "ma4": ma4 # 🟢 均線改存到股票身上！
+                "ma1": ma1, "ma2": ma2, "ma3": ma3, "ma4": ma4
             }
             
             if stock_res.status_code == 200 and stock_res.json():
-                # 🔄 存在：用 PATCH 覆寫該檔股票的均線參數，避免產生兩個台積電
                 stock_id = stock_res.json()[0]['id']
                 requests.patch(f"{SUPABASE_URL}/stocks?id=eq.{stock_id}", json=stock_payload, headers=headers, timeout=5)
-                print(f"🚀 雲端覆寫成功：{formatted_ticker} 均線參數已更新")
             else:
-                # ➕ 不存在：用 POST 新增一筆
                 requests.post(f"{SUPABASE_URL}/stocks", json=stock_payload, headers=headers, timeout=5)
-                print(f"🚀 雲端新增成功：{formatted_ticker} 已加入資料庫")
                 
         except Exception as db_err:
-            print(f"⚠️ Supabase 寫入失敗，原因: {db_err}")
-        # =========================================================================
+            print(f"⚠️ Supabase 寫入失敗: {db_err}")
 
         return {
             "ticker": ticker.upper(),
