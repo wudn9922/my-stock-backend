@@ -13,7 +13,7 @@
         
         .form-group { margin: 15px 0; text-align: left; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: bold; font-size: 14px; }
-        .form-group input { width: 90%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
+        .form-group input, .form-group select { width: 95%; padding: 8px; border: 1px solid #ccc; border-radius: 5px; font-size: 16px; }
         .btn { background-color: #28a745; color: white; border: none; padding: 10px 20px; border-radius: 5px; font-size: 16px; cursor: pointer; width: 100%; font-weight: bold; }
         .btn:disabled { background-color: #ccc; cursor: not-allowed; }
         
@@ -32,6 +32,19 @@
 
     <div class="card">
         <h3>➕ 新增觀察股票</h3>
+        
+        <div class="form-group">
+            <label>設定報告歸類組別</label>
+            <select id="group-input">
+                <option value="核心權值精選">🇹🇼 核心權值精選 (台股)</option>
+                <option value="航運與指標ETF">🇹🇼 航運與指標ETF (台股)</option>
+                <option value="AI與半導體">🇺🇸 AI與半導體 (美股)</option>
+                <option value="科技旗艦巨頭">🇺🇸 科技旗艦巨頭 (美股)</option>
+                <option value="特斯拉特選">🇺🇸 特斯拉特選 (美股)</option>
+                <option value="亞馬遜消費成長">🇺🇸 亞馬遜消費成長 (美股)</option>
+            </select>
+        </div>
+
         <div class="form-group">
             <label>股票代碼 (台股請加 .TW)</label>
             <input type="text" id="ticker-input" placeholder="例如: 2330.TW 或 NVDA" value="2330.TW">
@@ -70,7 +83,6 @@
     </div>
 
     <script>
-        // ⚠️ 記得替換成你的真實 LIFF ID ⚠️
         const LIFF_ID = "2010330411-SbwvRXRN";
 
         async function initializeLiff() {
@@ -88,8 +100,8 @@
             }
         }
 
-        // 🟢 核心改動：按下按鈕後，真正發送請求給本地 Python 大腦
         async function addStock() {
+            const groupName = document.getElementById("group-input").value; // 🟢 讀取分組名稱
             const ticker = document.getElementById("ticker-input").value.trim();
             const ma1 = document.getElementById("ma1-input").value;
             const ma2 = document.getElementById("ma2-input").value;
@@ -99,14 +111,13 @@
                 return;
             }
             
-            // 讓按鈕變成轉圈載入狀態，防止重複點擊
             const btn = document.getElementById("add-btn");
             btn.innerText = "大腦計算中...";
             btn.disabled = true;
             
             try {
-                // 1. 呼叫我們剛剛測試成功的本地 Python 網址
-                const response = await fetch(`https://my-stock-backend-bp8u.onrender.com/api/analyze?ticker=${ticker}&ma1=${ma1}&ma2=${ma2}`);
+                # 🟢 核心改動：將 group_name 參數一併帶給後端大腦
+                const response = await fetch(`https://my-stock-backend-bp8u.onrender.com/api/analyze?ticker=${ticker}&ma1=${ma1}&ma2=${ma2}&group_name=${encodeURIComponent(groupName)}`);
                 
                 if (!response.ok) {
                     const errorData = await response.json();
@@ -114,20 +125,16 @@
                     return;
                 }
                 
-                // 2. 解析 Python 回傳的 JSON 資料
                 const data = await response.json();
                 
-                // 3. 如果是第一次加股票，把「空空如也」的那一行移除
                 const emptyRow = document.getElementById("empty-row");
                 if (emptyRow) {
                     emptyRow.remove();
                 }
                 
-                // 4. 動態新增一行表格紀錄
                 const tableBody = document.getElementById("stock-table-body");
                 const newRow = document.createElement("tr");
                 
-                // 根據多空狀態決定字的顏色
                 const statusColor = data.status.includes("🟢") ? "#28a745" : "#dc3545";
                 
                 newRow.innerHTML = `
@@ -142,9 +149,8 @@
                 
             } catch (err) {
                 console.error(err);
-                alert("無法連線到 Python 大腦，請確保黑視窗（Uvicorn）還在執行中！");
+                alert("無法連線到 Python 大腦，請確保後端服務正常執行中！");
             } finally {
-                // 恢復按鈕狀態
                 btn.innerText = "加入我的清單";
                 btn.disabled = false;
             }
