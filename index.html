@@ -181,20 +181,21 @@
             // 解析均線字串轉整數陣列 (例如: "20,60" -> [20, 60])
             let masArray = masStr.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
 
-            // 組裝寫入 Supabase 的 JSON 資料
+            // 🛑 【關鍵修改】只傳送你資料庫實際擁有的欄位
             const saveData = {
                 line_user_id: currentUserId,
                 ticker: ticker,
-                stock_name: name,
-                ma_params: masArray,
-                is_admin: isAdminForm,
-                updated_at: new Date().toISOString()
+                // 把陣列裡的數字分配給 ma1 ~ ma4，如果用戶只填 2 個，剩下的就給 0
+                ma1: masArray[0] || 0,
+                ma2: masArray[1] || 0,
+                ma3: masArray[2] || 0,
+                ma4: masArray[3] || 0
             };
 
             // 寫入資料庫
             const { data, error } = await _supabase
                 .from('stocks')
-                .upsert(saveData, { onConflict: 'line_user_id,ticker' }); // 防止同個人重複重複插一樣的股票
+                .upsert(saveData); // 暫時先拿掉 onConflict，確保最基本的寫入能成功
 
             if (error) {
                 alert("❌ Supabase 寫入失敗: " + error.message + "\n(請檢查 RLS 是否有關閉)");
