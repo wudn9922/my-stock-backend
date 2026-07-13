@@ -252,34 +252,43 @@
             }
         }
 
-
         async function saveAdminStock() {
             if (!_supabase) return alert("Supabase 未就緒！");
-            let ticker = document.getElementById("admin-idx-select").value;
+            
+            // 取得下拉選單元素
+            let selectElement = document.getElementById("admin-idx-select");
+            let ticker = selectElement.value;
+            
+            // 💡 抓取下拉選單裡的「中文名稱」(例如從 "台灣加權指數 (^TWII)" 中切出 "台灣加權指數")
+            let rawText = selectElement.options[selectElement.selectedIndex].text;
+            let cleanName = rawText.split(" (")[0]; 
+            
             let masStr = document.getElementById("admin-idx-mas").value.trim();
             if (!masStr) return alert("請填寫大盤均線參數！");
 
             let masArray = masStr.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
 
-            // 針對 index_configs 資料表的結構
+            // 📦 打包資料，補上 name 欄位！
             const saveData = {
                 ticker: ticker,
+                name: cleanName,    // 新增這行：傳送大盤中文名稱
                 ma1: masArray[0] || 0,
                 ma2: masArray[1] || 0,
                 ma3: masArray[2] || 0,
                 ma4: masArray[3] || 0
             };
 
-            // 🚨 寫入 index_configs 資料表，以 ticker 作為防衝突鍵
             const { error } = await _supabase.from('index_configs').upsert(saveData, { onConflict: 'ticker' });
             
             if (error) {
                 alert("❌ 大盤參數寫入失敗: " + error.message);
             } else {
-                alert(`👑 大盤參數更新成功！\n資料表: index_configs\n代號: ${ticker}`);
+                alert(`👑 大盤參數更新成功！\n名稱: ${cleanName}\n代號: ${ticker}`);
                 document.getElementById("admin-idx-mas").value = "";
             }
         }
+
+
     </script>
 </body>
 </html>
