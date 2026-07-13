@@ -3,23 +3,16 @@
 <head>
     <title>自選股均線參數控制台</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <style>
         body { background-color: #111; color: #fff; font-family: Arial, sans-serif; margin: 0; padding: 10px; } 
         .header { text-align: center; padding: 15px 0; background: #222; margin-bottom: 15px; border-radius: 8px; } 
         .category-box { background: #1a1a1a; padding: 12px; margin-bottom: 15px; border-radius: 8px; border-left: 4px solid #00b0ff; } 
         .category-title { font-size: 15px; font-weight: bold; color: #00ff88; margin-bottom: 10px; padding-left: 5px; } 
-        
-        /* 表單與表格樣式 */
         .form-input { width: 100%; padding: 8px; margin: 5px 0; background: #222; color: #fff; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; }
         .form-btn { width: 100%; padding: 10px; font-weight: bold; border: none; border-radius: 4px; margin-top: 10px; cursor: pointer; }
         .stock-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
         .stock-table th { background: #222; color: #aaa; padding: 10px; text-align: left; border-bottom: 2px solid #444; white-space: nowrap; }
         .stock-table td { padding: 10px; border-bottom: 1px solid #333; color: #fff; }
-        
-        /* 彈性佈局（用於清單過濾器左右對齊） */
         .title-flex { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     </style>
 </head>
@@ -27,8 +20,8 @@
 
     <div class="header" style="background: #00b0ff;">
         <h2 style="margin: 0; color: #fff;">⚙️ 自選股均線參數控制台</h2>
-        <p id="liff-status" style="margin: 5px 0 0 0; color:#fff; font-size:13px;">正在初始化系統...</p>
-        <p id="user-id-display" style="margin: 2px 0 0 0; color:#ffeb3b; font-size:11px;"></p>
+        <p id="liff-status" style="margin: 5px 0 0 0; color:#fff; font-size:13px;">網頁骨架已載入...</p>
+        <p id="user-id-display" style="margin: 2px 0 0 0; color:#ffeb3b; font-size:11px;">正在載入身分識別...</p>
     </div>
 
     <div class="category-box" style="border-left-color: #00ff88;" id="user-panel">
@@ -86,12 +79,22 @@
                     </tr>
                 </thead>
                 <tbody id="stock-list-body">
-                    <tr><td colspan="4" style="text-align:center; color:#666;">載入清單中...</td></tr>
+                    <tr><td colspan="4" style="text-align:center; color:#666;">系統初始化中...</td></tr>
                 </tbody>
             </table>
         </div>
     </div>
 
+    <script>
+        // 🛑 手機即時除錯盾牌：如果以下 JS 有任何崩潰，直接在手機上彈窗通知
+        window.onerror = function(message, source, lineno, colno, error) {
+            alert("🚨 網頁出錯了！\n錯誤訊息: " + message + "\n錯誤行號: " + lineno);
+            return false;
+        };
+    </script>
+    <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script>
         const SUPABASE_URL = "https://bxhqpfeberqbtxymghyt.supabase.co"; 
         const SUPABASE_ANON_KEY = "sb_publishable_eEJNM_96jblQ_90vpcYC0g_PzyGJNOK";
@@ -109,14 +112,14 @@
         };
 
         window.onload = async function() {
-            // 初始化 Supabase
+            // 嘗試初始化 Supabase
             try {
                 _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             } catch (e) {
-                console.error("Supabase 初始化失敗", e);
+                alert("Supabase 連線失敗: " + e.message);
             }
 
-            // 防崩潰 LINE LIFF 初始化邏輯
+            // 嘗試初始化 LINE LIFF
             try {
                 await liff.init({ liffId: LIFF_ID });
                 
@@ -126,36 +129,37 @@
                     document.getElementById("liff-status").innerText = "👤 已登入: " + profile.displayName;
                     document.getElementById("user-id-display").innerText = "ID: " + currentUserId;
                 } else {
-                    document.getElementById("liff-status").innerText = "⚠️ 請在 LINE App 中開啟以同步自選股";
-                    if (liff.isInClient()) {
-                        liff.login(); // 只有在 LINE App 內才強制彈出登入
-                    } else {
-                        // 瀏覽器預覽模式：給予一個虛擬測試 ID，確保看得到畫面、動得了選單
-                        currentUserId = "BROWSER_TEST_USER";
-                        document.getElementById("user-id-display").innerText = "ID: BROWSER_TEST_USER (網頁預覽模式)";
-                    }
+                    document.getElementById("liff-status").innerText = "⚠️ 測試模式 (未在 LINE 內登入)";
+                    currentUserId = "BROWSER_TEST_USER";
+                    document.getElementById("user-id-display").innerText = "ID: BROWSER_TEST_USER";
                 }
             } catch (err) {
-                // 如果在一般瀏覽器報錯，直接放行進入「網頁預覽模式」，畫面絕對不消失！
-                document.getElementById("liff-status").innerText = "ℹ️ 網頁預覽模式 (未連結 LINE 環境)";
+                document.getElementById("liff-status").innerText = "ℹ️ 瀏覽器預覽模式";
                 currentUserId = "BROWSER_TEST_USER";
-                document.getElementById("user-id-display").innerText = "ID: BROWSER_TEST_USER (本地測試)";
+                document.getElementById("user-id-display").innerText = "ID: BROWSER_TEST_USER";
             }
 
-            // 👑 權限檢查：只有真正的管理員才會打開紅色的管理員面板
+            // 管理員權限檢查
             if (currentUserId === ADMIN_LINE_ID) {
                 document.getElementById("admin-panel").style.display = "block";
-            } else {
-                document.getElementById("admin-panel").style.display = "none";
             }
 
-            // 載入資料庫股票清單
+            // 撈取資料
             fetchUserStocks();
         };
 
-        // 🔄 撈取自選股資料
         async function fetchUserStocks() {
-            if (!_supabase || currentUserId === "GUEST") return;
+            if (!_supabase) return;
+
+            // 測試模式的假資料
+            if (currentUserId === "BROWSER_TEST_USER") {
+                allUserStocks = [
+                    { ticker: "2330.TW", group_id: "tw_g1", ma1: 20, ma2: 60, ma3: 120, ma4: 0 },
+                    { ticker: "AAPL", group_id: "us_g1", ma1: 50, ma2: 200, ma3: 0, ma4: 0 }
+                ];
+                renderStockList();
+                return;
+            }
 
             const { data, error } = await _supabase
                 .from('stocks')
@@ -164,16 +168,7 @@
                 .neq('group_id', 'admin_index');
 
             if (error) {
-                console.error("無法讀取清單:", error.message);
-                // 測試模式下如果沒資料，給一組假資料美化畫面，方便你確認排版
-                if (currentUserId === "BROWSER_TEST_USER") {
-                    allUserStocks = [
-                        { ticker: "2330.TW", group_id: "tw_g1", ma1: 20, ma2: 60, ma3: 120, ma4: 0 },
-                        { ticker: "AAPL", group_id: "us_g1", ma1: 50, ma2: 200, ma3: 0, ma4: 0 },
-                        { ticker: "NVDA", group_id: "us_g4", ma1: 5, ma2: 10, ma3: 20, ma4: 60 }
-                    ];
-                    renderStockList();
-                }
+                console.error(error);
                 return;
             }
 
@@ -181,7 +176,6 @@
             renderStockList(); 
         }
 
-        // 🎨 前端即時渲染過濾清單
         function renderStockList() {
             const tbody = document.getElementById("stock-list-body");
             const filterValue = document.getElementById("list-filter").value;
@@ -211,7 +205,6 @@
             });
         }
 
-        // 👨‍💻 一般用戶存檔
         async function saveUserStock() {
             if (!_supabase) return alert("Supabase 未就緒！");
             let ticker = document.getElementById("reg-ticker").value.trim().toUpperCase();
@@ -219,8 +212,6 @@
             let masStr = document.getElementById("reg-mas").value.trim();
 
             if (!ticker || !masStr) return alert("請填寫代號與均線！");
-            if (ticker.startsWith("^") || ticker.includes("大盤")) return alert("🛑 一般用戶無法設定大盤！");
-
             let masArray = masStr.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
             
             const saveData = {
@@ -234,10 +225,8 @@
             };
 
             const { error } = await _supabase.from('stocks').upsert(saveData, { onConflict: 'line_user_id,ticker' });
-
-            if (error) {
-                alert("❌ 寫入失敗: " + error.message);
-            } else {
+            if (error) alert("❌ 寫入失敗: " + error.message);
+            else {
                 alert(`🎉 儲存成功！\n代號: ${ticker}`);
                 document.getElementById("reg-ticker").value = "";
                 document.getElementById("reg-mas").value = "";
@@ -245,7 +234,6 @@
             }
         }
 
-        // 👑 管理員大盤存檔
         async function saveAdminStock() {
             if (!_supabase) return alert("Supabase 未就緒！");
             let ticker = document.getElementById("admin-idx-select").value;
@@ -265,10 +253,8 @@
             };
 
             const { error } = await _supabase.from('stocks').upsert(saveData, { onConflict: 'line_user_id,ticker' });
-
-            if (error) {
-                alert("❌ 大盤參數寫入失敗: " + error.message);
-            } else {
+            if (error) alert("❌ 大盤參數寫入失敗: " + error.message);
+            else {
                 alert(`👑 大盤參數更新成功！\n代號: ${ticker}`);
                 document.getElementById("admin-idx-mas").value = "";
             }
