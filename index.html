@@ -125,28 +125,34 @@
                 
                 if (liff.isLoggedIn()) {
                     const profile = await liff.getProfile();
-                    currentUserId = profile.userId;
+                    // 強制清除可能存在的隱形空白
+                    currentUserId = profile.userId.trim(); 
                     document.getElementById("liff-status").innerText = "👤 已登入: " + profile.displayName;
                     document.getElementById("user-id-display").innerText = "ID: " + currentUserId;
+                    
+                    // 🚨 直接在這裡做權限檢查，確保變數 100% 已經拿到
+                    if (currentUserId === ADMIN_LINE_ID.trim()) {
+                        document.getElementById("admin-panel").style.display = "block";
+                    }
                 } else {
                     document.getElementById("liff-status").innerText = "⚠️ 測試模式 (未在 LINE 內登入)";
                     currentUserId = "BROWSER_TEST_USER";
                     document.getElementById("user-id-display").innerText = "ID: BROWSER_TEST_USER";
+                    
+                    // 電腦預覽測試時也給予管理員畫面
+                    document.getElementById("admin-panel").style.display = "block";
                 }
             } catch (err) {
                 document.getElementById("liff-status").innerText = "ℹ️ 瀏覽器預覽模式";
                 currentUserId = "BROWSER_TEST_USER";
                 document.getElementById("user-id-display").innerText = "ID: BROWSER_TEST_USER";
-            }
-
-            // 管理員權限檢查
-            if (currentUserId === ADMIN_LINE_ID) {
                 document.getElementById("admin-panel").style.display = "block";
             }
 
-            // 撈取資料
+            // 撈取資料庫清單
             fetchUserStocks();
         };
+
 
         async function fetchUserStocks() {
             if (!_supabase) return;
