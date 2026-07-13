@@ -67,6 +67,7 @@
     <div class="header" style="background: #00b0ff; padding: 10px;">
         <h3 style="margin: 0; color: #fff;">⚙️ 參數設定控制台</h3>
         <p id="liff-status" style="margin: 5px 0 0 0; color:#fff; font-size:13px;">正在檢查 LINE 登入狀態...</p>
+        <p id="user-id-display" style="margin: 2px 0 0 0; color:#ffeb3b; font-size:11px;"></p>
     </div>
 
     <div class="category-box" style="border-left-color: #00ff88; display: none;" id="user-panel">
@@ -75,10 +76,8 @@
         <input type="text" id="reg-ticker" class="form-input" placeholder="股票代號 (例: 2330.TW)">
         
         <select id="reg-group" class="form-input">
-            <option value="tw_all">🇹🇼 台股 - 全市場潛伏</option>
             <option value="tw_g1">🇹🇼 台股 - 權值精選</option>
             <option value="tw_g2">🇹🇼 台股 - 熱門</option>
-            <option value="us_all">🇺🇸 美股 - 全市場潛伏</option>
             <option value="us_g1">🇺🇸 美股 - 權值精選</option>
             <option value="us_g2">🇺🇸 美股 - 低本益比</option>
             <option value="us_g3">🇺🇸 美股 - 超級績效</option>
@@ -90,15 +89,33 @@
     </div>
 
     <div class="category-box" style="border-left-color: #ff5252; display: none;" id="admin-panel">
-        <div class="category-title" style="color: #ff5252;">👑 全域大盤廣播參數 (直接修改)</div>
+        <div class="category-title" style="color: #ff5252;">👑 全域大盤廣播參數 (僅管理員)</div>
         
-        <p style="margin: 10px 0 5px 0; font-size: 13px; color: #ddd;">📈 台灣加權指數 (^TWII)</p>
-        <input type="text" id="idx-mas-tw" class="form-input" placeholder="台股大盤均線 (例: 20,27,61)">
-        <button onclick="saveAdminStock('^TWII', 'idx-mas-tw')" class="form-btn" style="background: #ff5252; color: #fff;">儲存台股大盤設定</button>
+        <select id="admin-idx-select" class="form-input" style="font-size: 14px;">
+            <optgroup label="🇹🇼 台灣股市">
+                <option value="^TWII">台灣加權指數 (^TWII)</option>
+                <option value="^TWOII">櫃買指數 (^TWOII)</option>
+            </optgroup>
+            <optgroup label="🇺🇸 美國股市">
+                <option value="^GSPC">標普500 (^GSPC)</option>
+                <option value="^DJI">道瓊工業指數 (^DJI)</option>
+                <option value="^IXIC">那斯達克 (^IXIC)</option>
+                <option value="^RUT">羅素2000 (^RUT)</option>
+                <option value="^SOX">費城半導體 (^SOX)</option>
+            </optgroup>
+            <optgroup label="🇪🇺 歐洲股市">
+                <option value="^FCHI">法國 CAC40 (^FCHI)</option>
+                <option value="^FTSE">英國富時100 (^FTSE)</option>
+                <option value="^GDAXI">德國 DAX (^GDAXI)</option>
+            </optgroup>
+            <optgroup label="🌏 亞洲股市">
+                <option value="^N225">日經225 (^N225)</option>
+                <option value="^KS11">韓國 KOSPI (^KS11)</option>
+            </optgroup>
+        </select>
 
-        <p style="margin: 20px 0 5px 0; font-size: 13px; color: #ddd;">📈 那斯達克指數 (^IXIC)</p>
-        <input type="text" id="idx-mas-us" class="form-input" placeholder="美股大盤均線 (例: 20,50,200)">
-        <button onclick="saveAdminStock('^IXIC', 'idx-mas-us')" class="form-btn" style="background: #ff5252; color: #fff;">儲存美股大盤設定</button>
+        <input type="text" id="admin-idx-mas" class="form-input" placeholder="請輸入大盤均線參數 (例: 20,50,200)">
+        <button onclick="saveAdminStock()" class="form-btn" style="background: #ff5252; color: #fff;">儲存大盤設定</button>
     </div>
 
     <script>
@@ -116,6 +133,8 @@
         const SUPABASE_URL = "https://bxhqpfeberqbtxymghyt.supabase.co"; 
         const SUPABASE_ANON_KEY = "sb_publishable_eEJNM_96jblQ_90vpcYC0g_PzyGJNOK";
         const LIFF_ID = "2010330411-SbwvRXRN"; 
+        
+        // 🚨 請檢查這串 ID 是否與網頁上黃色小字顯示的一模一樣
         const ADMIN_LINE_ID = "Ue89af56e9ec9f92462a26c5ea099ed27";
 
         let _supabase;
@@ -129,9 +148,13 @@
                 if (liff.isLoggedIn()) {
                     const profile = await liff.getProfile();
                     currentUserId = profile.userId;
+                    
                     document.getElementById("liff-status").innerText = "👤 已登入: " + profile.displayName;
+                    document.getElementById("user-id-display").innerText = "ID: " + currentUserId; // 顯示 ID 幫你除錯
 
                     document.getElementById("user-panel").style.display = "block";
+                    
+                    // 判斷是否為管理員，如果 ID 符合才顯示管理員面板
                     if (currentUserId === ADMIN_LINE_ID) {
                         document.getElementById("admin-panel").style.display = "block";
                     }
@@ -144,7 +167,7 @@
             }
         };
 
-        // 👨‍💻 一般用戶存檔邏輯 (抓取 Group ID)
+        // 👨‍💻 一般用戶存檔邏輯
         async function saveUserStock() {
             if (!_supabase) return alert("Supabase 未就緒！");
             if (currentUserId === "GUEST") return alert("未授權！");
@@ -161,14 +184,13 @@
             const saveData = {
                 line_user_id: currentUserId,
                 ticker: ticker,
-                group_id: groupId, // 🔥 新增 group_id 存入資料庫
+                group_id: groupId,
                 ma1: masArray[0] || 0,
                 ma2: masArray[1] || 0,
                 ma3: masArray[2] || 0,
                 ma4: masArray[3] || 0
             };
 
-            // 使用 onConflict 確保同個人、同一檔股票只會被「更新」而不會重複新增
             const { error } = await _supabase.from('stocks').upsert(saveData, { onConflict: 'line_user_id,ticker' });
 
             if (error) {
@@ -180,11 +202,13 @@
             }
         }
 
-        // 👑 管理員專屬大盤存檔邏輯 (直接寫死代號)
-        async function saveAdminStock(ticker, inputId) {
+        // 👑 管理員專屬大盤存檔邏輯 (抓取下拉選單的值)
+        async function saveAdminStock() {
             if (!_supabase) return alert("Supabase 未就緒！");
 
-            let masStr = document.getElementById(inputId).value.trim();
+            let ticker = document.getElementById("admin-idx-select").value;
+            let masStr = document.getElementById("admin-idx-mas").value.trim();
+            
             if (!masStr) return alert("請填寫大盤均線參數！");
 
             let masArray = masStr.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
@@ -192,7 +216,7 @@
             const saveData = {
                 line_user_id: currentUserId,
                 ticker: ticker,
-                group_id: "admin_index", // 大盤專屬群組標籤
+                group_id: "admin_index", // 大盤統一存入這個群組
                 ma1: masArray[0] || 0,
                 ma2: masArray[1] || 0,
                 ma3: masArray[2] || 0,
@@ -205,7 +229,7 @@
                 alert("❌ 大盤參數寫入失敗: " + error.message);
             } else {
                 alert(`👑 大盤參數更新成功！\n代號: ${ticker}\n均線: ${masStr}`);
-                document.getElementById(inputId).value = "";
+                document.getElementById("admin-idx-mas").value = "";
             }
         }
     </script>
