@@ -22,9 +22,12 @@
         .plotly-container { height: 400px; background: #151515; border-radius: 6px; } 
         .no-data { text-align: center; color: #888; padding: 40px; font-size: 14px; }
         
-        /* 表單元素共用樣式 */
+        /* 表單與表格共用樣式 */
         .form-input { width: 100%; padding: 8px; margin: 5px 0; background: #222; color: #fff; border: 1px solid #444; border-radius: 4px; box-sizing: border-box; }
         .form-btn { width: 100%; padding: 10px; font-weight: bold; border: none; border-radius: 4px; margin-top: 10px; cursor: pointer; }
+        .stock-table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 14px; }
+        .stock-table th { background: #222; color: #aaa; padding: 10px; text-align: left; border-bottom: 2px solid #444; }
+        .stock-table td { padding: 10px; border-bottom: 1px solid #333; color: #fff; }
     </style>
 </head>
 <body>
@@ -64,7 +67,8 @@
     <div id="us_g4-market" class="market-section"><div class="no-data">此分類目前無股票符合群組自訂均線潛伏條件</div></div>
 
     <hr style="border: 1px solid #333; margin: 30px 0;">
-    <div class="header" style="background: #00b0ff; padding: 10px;">
+    
+    <div class="header" style="background: #00b0ff; padding: 10px; margin-bottom: 15px;">
         <h3 style="margin: 0; color: #fff;">⚙️ 參數設定控制台</h3>
         <p id="liff-status" style="margin: 5px 0 0 0; color:#fff; font-size:13px;">正在檢查 LINE 登入狀態...</p>
         <p id="user-id-display" style="margin: 2px 0 0 0; color:#ffeb3b; font-size:11px;"></p>
@@ -72,9 +76,7 @@
 
     <div class="category-box" style="border-left-color: #00ff88; display: none;" id="user-panel">
         <div class="category-title" style="color: #00ff88;">➕ 新增/修改 我的自選股</div>
-        
         <input type="text" id="reg-ticker" class="form-input" placeholder="股票代號 (例: 2330.TW)">
-        
         <select id="reg-group" class="form-input">
             <option value="tw_g1">🇹🇼 台股 - 權值精選</option>
             <option value="tw_g2">🇹🇼 台股 - 熱門</option>
@@ -83,14 +85,12 @@
             <option value="us_g3">🇺🇸 美股 - 超級績效</option>
             <option value="us_g4">🇺🇸 美股 - 熱門</option>
         </select>
-
         <input type="text" id="reg-mas" class="form-input" placeholder="均線參數 (用逗號隔開，例: 20,60,120)">
         <button onclick="saveUserStock()" class="form-btn" style="background: #00ff88; color: #000;">儲存自選股設定</button>
     </div>
 
     <div class="category-box" style="border-left-color: #ff5252; display: none;" id="admin-panel">
         <div class="category-title" style="color: #ff5252;">👑 全域大盤廣播參數 (僅管理員)</div>
-        
         <select id="admin-idx-select" class="form-input" style="font-size: 14px;">
             <optgroup label="🇹🇼 台灣股市">
                 <option value="^TWII">台灣加權指數 (^TWII)</option>
@@ -113,13 +113,29 @@
                 <option value="^KS11">韓國 KOSPI (^KS11)</option>
             </optgroup>
         </select>
-
         <input type="text" id="admin-idx-mas" class="form-input" placeholder="請輸入大盤均線參數 (例: 20,50,200)">
         <button onclick="saveAdminStock()" class="form-btn" style="background: #ff5252; color: #fff;">儲存大盤設定</button>
     </div>
 
+    <div class="category-box" style="border-left-color: #ffeb3b; display: none;" id="stock-list-panel">
+        <div class="category-title" style="color: #ffeb3b;">📋 我的自選股追蹤清單</div>
+        <div style="overflow-x: auto;">
+            <table class="stock-table">
+                <thead>
+                    <tr>
+                        <th>編號</th>
+                        <th>股票代碼</th>
+                        <th>均線參數</th>
+                    </tr>
+                </thead>
+                <tbody id="stock-list-body">
+                    <tr><td colspan="3" style="text-align:center; color:#666;">載入清單中...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <script>
-        // 頁籤切換邏輯
         function switchMarket(evt, marketName) {
             var i, tabcontent, tablinks;
             tabcontent = document.getElementsByClassName("market-section");
@@ -133,9 +149,7 @@
         const SUPABASE_URL = "https://bxhqpfeberqbtxymghyt.supabase.co"; 
         const SUPABASE_ANON_KEY = "sb_publishable_eEJNM_96jblQ_90vpcYC0g_PzyGJNOK";
         const LIFF_ID = "2010330411-SbwvRXRN"; 
-        
-        // 🚨 請檢查這串 ID 是否與網頁上黃色小字顯示的一模一樣
-        const ADMIN_LINE_ID = "Ua0037dbd5037b64fc76804c60520ad76";
+        const ADMIN_LINE_ID = "Ue89af56e9ec9f92462a26c5ea099ed27";
 
         let _supabase;
         let currentUserId = "GUEST";
@@ -150,11 +164,13 @@
                     currentUserId = profile.userId;
                     
                     document.getElementById("liff-status").innerText = "👤 已登入: " + profile.displayName;
-                    document.getElementById("user-id-display").innerText = "ID: " + currentUserId; // 顯示 ID 幫你除錯
+                    document.getElementById("user-id-display").innerText = "ID: " + currentUserId;
 
                     document.getElementById("user-panel").style.display = "block";
+                    document.getElementById("stock-list-panel").style.display = "block";
                     
-                    // 判斷是否為管理員，如果 ID 符合才顯示管理員面板
+                    fetchUserStocks();
+                    
                     if (currentUserId === ADMIN_LINE_ID) {
                         document.getElementById("admin-panel").style.display = "block";
                     }
@@ -166,6 +182,42 @@
                 document.getElementById("liff-status").innerText = "❌ 系統初始化失敗: " + err.message;
             }
         };
+
+        // 🔄 動態撈取並渲染用戶自選股清單
+        async function fetchUserStocks() {
+            if (!_supabase || currentUserId === "GUEST") return;
+
+            const { data, error } = await _supabase
+                .from('stocks')
+                .select('ticker, ma1, ma2, ma3, ma4')
+                .eq('line_user_id', currentUserId)
+                .neq('group_id', 'admin_index');
+
+            if (error) {
+                console.error("無法讀取清單:", error.message);
+                return;
+            }
+
+            const tbody = document.getElementById("stock-list-body");
+            tbody.innerHTML = "";
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="3" style="text-align:center; color:#666; padding:20px;">目前無追蹤自選股，請從上方表單新增。</td></tr>`;
+                return;
+            }
+
+            // 依序渲染表格內容
+            data.forEach((stock, index) => {
+                let mas = [stock.ma1, stock.ma2, stock.ma3, stock.ma4].filter(num => num > 0).join(', ');
+                
+                let tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td style="color: #888;">${index + 1}</td> <td style="font-weight: bold; color: #00ff88;">${stock.ticker}</td>
+                    <td>${mas || '未設定'}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
         // 👨‍💻 一般用戶存檔邏輯
         async function saveUserStock() {
@@ -199,10 +251,12 @@
                 alert(`🎉 儲存成功！\n代號: ${ticker}\n群組: ${groupId}`);
                 document.getElementById("reg-ticker").value = "";
                 document.getElementById("reg-mas").value = "";
+                
+                fetchUserStocks();
             }
         }
 
-        // 👑 管理員專屬大盤存檔邏輯 (抓取下拉選單的值)
+        // 👑 管理員專屬大盤存檔邏輯
         async function saveAdminStock() {
             if (!_supabase) return alert("Supabase 未就緒！");
 
@@ -216,7 +270,7 @@
             const saveData = {
                 line_user_id: currentUserId,
                 ticker: ticker,
-                group_id: "admin_index", // 大盤統一存入這個群組
+                group_id: "admin_index",
                 ma1: masArray[0] || 0,
                 ma2: masArray[1] || 0,
                 ma3: masArray[2] || 0,
