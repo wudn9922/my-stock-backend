@@ -49,6 +49,18 @@
             <optgroup label="🇺🇸 美國股市">
                 <option value="^GSPC">標普500 (^GSPC)</option>
                 <option value="^IXIC">那斯達克 (^IXIC)</option>
+                <option value="^IXIC">那斯達克 (^IXIC)</option>
+                <option value="^RUT">羅素2000 (^RUT)</option>
+                <option value="^SOX">費城半導體 (^SOX)</option>
+            </optgroup>
+            <optgroup label="🇪🇺 歐洲股市">
+                <option value="^FCHI">法國 CAC40 (^FCHI)</option>
+                <option value="^FTSE">英國富時100 (^FTSE)</option>
+                <option value="^GDAXI">德國 DAX (^GDAXI)</option>
+            </optgroup>
+            <optgroup label="🌏 亞洲股市">
+                <option value="^N225">日經225 (^N225)</option>
+                <option value="^KS11">韓國 KOSPI (^KS11)</option>
             </optgroup>
         </select>
         <input type="text" id="admin-idx-mas" class="form-input" placeholder="請輸入大盤均線參數 (例: 20,50,200)">
@@ -240,6 +252,7 @@
             }
         }
 
+
         async function saveAdminStock() {
             if (!_supabase) return alert("Supabase 未就緒！");
             let ticker = document.getElementById("admin-idx-select").value;
@@ -248,20 +261,22 @@
 
             let masArray = masStr.split(',').map(num => parseInt(num.trim())).filter(num => !isNaN(num));
 
+            // 針對 index_configs 資料表的結構
             const saveData = {
-                line_user_id: currentUserId,
                 ticker: ticker,
-                group_id: "admin_index",
                 ma1: masArray[0] || 0,
                 ma2: masArray[1] || 0,
                 ma3: masArray[2] || 0,
                 ma4: masArray[3] || 0
             };
 
-            const { error } = await _supabase.from('stocks').upsert(saveData, { onConflict: 'line_user_id,ticker' });
-            if (error) alert("❌ 大盤參數寫入失敗: " + error.message);
-            else {
-                alert(`👑 大盤參數更新成功！\n代號: ${ticker}`);
+            // 🚨 寫入 index_configs 資料表，以 ticker 作為防衝突鍵
+            const { error } = await _supabase.from('index_configs').upsert(saveData, { onConflict: 'ticker' });
+            
+            if (error) {
+                alert("❌ 大盤參數寫入失敗: " + error.message);
+            } else {
+                alert(`👑 大盤參數更新成功！\n資料表: index_configs\n代號: ${ticker}`);
                 document.getElementById("admin-idx-mas").value = "";
             }
         }
