@@ -2,7 +2,9 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
+
     <title>自選股均線參數控制台</title>
+
     <meta
         name="viewport"
         content="width=device-width, initial-scale=1.0"
@@ -69,7 +71,8 @@
         }
 
         .form-btn:disabled,
-        .action-btn:disabled {
+        .action-btn:disabled,
+        .group-action-btn:disabled {
             opacity: 0.55;
             cursor: not-allowed;
         }
@@ -117,7 +120,8 @@
         }
 
         .clear-btn,
-        .action-btn {
+        .action-btn,
+        .group-action-btn {
             border: none;
             border-radius: 4px;
             padding: 7px 10px;
@@ -166,10 +170,97 @@
             line-height: 1.5;
         }
 
+        .group-create-row {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .group-create-row .form-input {
+            flex: 1;
+            margin: 0;
+        }
+
+        .group-create-button {
+            width: auto;
+            min-width: 100px;
+            margin: 0;
+            background: #ab47bc;
+            color: #fff;
+        }
+
+        .group-help {
+            color: #999;
+            font-size: 12px;
+            line-height: 1.5;
+            margin: 9px 2px;
+        }
+
+        .custom-group-list {
+            margin-top: 12px;
+        }
+
+        .custom-group-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            margin-bottom: 7px;
+            background: #222;
+            border: 1px solid #383838;
+            border-radius: 5px;
+        }
+
+        .custom-group-info {
+            min-width: 0;
+            flex: 1;
+        }
+
+        .custom-group-name {
+            color: #e1bee7;
+            font-weight: bold;
+            word-break: break-word;
+        }
+
+        .custom-group-count {
+            color: #888;
+            font-size: 11px;
+            margin-top: 4px;
+        }
+
+        .custom-group-actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .group-edit-btn {
+            background: #00b0ff;
+            color: #fff;
+        }
+
+        .group-delete-btn {
+            background: #ff5252;
+            color: #fff;
+        }
+
+        .empty-group-message {
+            color: #777;
+            text-align: center;
+            padding: 15px;
+            border: 1px dashed #444;
+            border-radius: 5px;
+        }
+
         @media (max-width: 600px) {
-            .list-toolbar {
+            .list-toolbar,
+            .group-create-row {
                 flex-direction: column;
                 align-items: stretch;
+            }
+
+            .group-create-button {
+                width: 100%;
             }
 
             .stock-table th,
@@ -186,6 +277,19 @@
 
             .edit-btn {
                 margin-right: 0;
+            }
+
+            .custom-group-item {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .custom-group-actions {
+                width: 100%;
+            }
+
+            .group-action-btn {
+                flex: 1;
             }
         }
     </style>
@@ -217,6 +321,53 @@
         </p>
     </div>
 
+    <!-- 自訂分組管理 -->
+    <div
+        class="category-box"
+        style="border-left-color: #ab47bc;"
+        id="group-panel"
+    >
+        <div
+            class="category-title"
+            style="color: #e1bee7;"
+        >
+            🗂️ 我的自訂分組
+        </div>
+
+        <div class="group-create-row">
+            <input
+                type="text"
+                id="new-group-name"
+                class="form-input"
+                placeholder="請輸入新分組名稱"
+                maxlength="30"
+                autocomplete="off"
+            >
+
+            <button
+                type="button"
+                id="create-group-btn"
+                class="form-btn group-create-button"
+                onclick="createCustomGroup()"
+            >
+                新增分組
+            </button>
+        </div>
+
+        <div class="group-help">
+            每個自訂分組只屬於目前登入的 LINE 使用者。分組內還有股票時，必須先移動或刪除股票，才能刪除該分組。
+        </div>
+
+        <div
+            id="custom-group-list"
+            class="custom-group-list"
+        >
+            <div class="empty-group-message">
+                自訂分組載入中...
+            </div>
+        </div>
+    </div>
+
     <!-- 使用者自選股設定 -->
     <div
         class="category-box"
@@ -236,8 +387,8 @@
             class="editing-message"
         >
             ✏️ 目前正在編輯這一筆自選股設定。<br>
-            股票代號不可修改，但可以修改群組及均線參數。<br>
-            修改不會影響其他群組中的相同股票。
+            股票代號不可修改，但可以修改分組及均線參數。<br>
+            修改不會影響其他分組中的相同股票。
         </div>
 
         <input
@@ -252,29 +403,39 @@
             id="reg-group"
             class="form-input"
         >
-            <option value="tw_g1">
-                🇹🇼 台股 - 權值精選
-            </option>
+            <optgroup
+                id="reg-fixed-group-options"
+                label="系統預設分組"
+            >
+                <option value="tw_g1">
+                    🇹🇼 台股 - 權值精選
+                </option>
 
-            <option value="tw_g2">
-                🇹🇼 台股 - 熱門
-            </option>
+                <option value="tw_g2">
+                    🇹🇼 台股 - 熱門
+                </option>
 
-            <option value="us_g1">
-                🇺🇸 美股 - 權值精選
-            </option>
+                <option value="us_g1">
+                    🇺🇸 美股 - 權值精選
+                </option>
 
-            <option value="us_g2">
-                🇺🇸 美股 - 低本益比
-            </option>
+                <option value="us_g2">
+                    🇺🇸 美股 - 低本益比
+                </option>
 
-            <option value="us_g3">
-                🇺🇸 美股 - 超級績效
-            </option>
+                <option value="us_g3">
+                    🇺🇸 美股 - 超級績效
+                </option>
 
-            <option value="us_g4">
-                🇺🇸 美股 - 熱門
-            </option>
+                <option value="us_g4">
+                    🇺🇸 美股 - 熱門
+                </option>
+            </optgroup>
+
+            <optgroup
+                id="reg-custom-group-options"
+                label="我的自訂分組"
+            ></optgroup>
         </select>
 
         <input
@@ -420,39 +581,48 @@
                     👀 顯示全部
                 </option>
 
-                <option value="tw_g1">
-                    🇹🇼 台股 - 權值
-                </option>
+                <optgroup
+                    id="filter-fixed-group-options"
+                    label="系統預設分組"
+                >
+                    <option value="tw_g1">
+                        🇹🇼 台股 - 權值
+                    </option>
 
-                <option value="tw_g2">
-                    🇹🇼 台股 - 熱門
-                </option>
+                    <option value="tw_g2">
+                        🇹🇼 台股 - 熱門
+                    </option>
 
-                <option value="us_g1">
-                    🇺🇸 美股 - 權值
-                </option>
+                    <option value="us_g1">
+                        🇺🇸 美股 - 權值
+                    </option>
 
-                <option value="us_g2">
-                    🇺🇸 美股 - 低本
-                </option>
+                    <option value="us_g2">
+                        🇺🇸 美股 - 低本
+                    </option>
 
-                <option value="us_g3">
-                    🇺🇸 美股 - 績效
-                </option>
+                    <option value="us_g3">
+                        🇺🇸 美股 - 績效
+                    </option>
 
-                <option value="us_g4">
-                    🇺🇸 美股 - 熱門
-                </option>
+                    <option value="us_g4">
+                        🇺🇸 美股 - 熱門
+                    </option>
+                </optgroup>
+
+                <optgroup
+                    id="filter-custom-group-options"
+                    label="我的自訂分組"
+                ></optgroup>
             </select>
         </div>
 
-        <!-- 搜尋列 -->
         <div class="list-toolbar">
             <input
                 type="search"
                 id="stock-search"
                 class="form-input"
-                placeholder="搜尋股票代號或群組..."
+                placeholder="搜尋股票代號或分組..."
                 oninput="renderStockList()"
                 autocomplete="off"
             >
@@ -479,7 +649,7 @@
                     <tr>
                         <th>編號</th>
                         <th>代碼</th>
-                        <th>群組</th>
+                        <th>分組</th>
                         <th>參數</th>
                         <th>操作</th>
                     </tr>
@@ -500,7 +670,6 @@
     </div>
 
     <script>
-        // 手機即時除錯盾牌
         window.onerror = function(
             message,
             source,
@@ -522,6 +691,12 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
+        /*
+         * 注意：
+         * GitHub Pages 的 HTML 無法讀取 Render Secret。
+         * 這裡保留原本前端 Supabase publishable key，
+         * 並不是 service_role key。
+         */
         const SUPABASE_URL =
             "https://bxhqpfeberqbtxymghyt.supabase.co";
 
@@ -537,13 +712,13 @@
         let _supabase;
         let currentUserId = "GUEST";
         let allUserStocks = [];
+        let customGroups = [];
 
-        // 編輯中的資料
         let editingStockId = null;
         let editingTicker = null;
         let editingOriginalGroupId = null;
 
-        const groupNameMap = {
+        const fixedGroupNameMap = {
             "tw_g1": "台股權值",
             "tw_g2": "台股熱門",
             "us_g1": "美股權值",
@@ -552,8 +727,11 @@
             "us_g4": "美股熱門"
         };
 
+        const groupNameMap = {
+            ...fixedGroupNameMap
+        };
+
         window.onload = async function() {
-            // 初始化 Supabase
             try {
                 _supabase = supabase.createClient(
                     SUPABASE_URL,
@@ -566,7 +744,6 @@
                 );
             }
 
-            // 初始化 LINE LIFF
             try {
                 await liff.init({
                     liffId: LIFF_ID
@@ -590,7 +767,6 @@
                     ).innerText =
                         "ID: " + currentUserId;
 
-                    // 管理員畫面檢查
                     if (
                         currentUserId ===
                         ADMIN_LINE_ID.trim()
@@ -613,7 +789,6 @@
                     ).innerText =
                         "ID: BROWSER_TEST_USER";
 
-                    // 電腦預覽測試時顯示管理員畫面
                     document.getElementById(
                         "admin-panel"
                     ).style.display = "block";
@@ -637,13 +812,818 @@
                 ).style.display = "block";
             }
 
-            // 撈取自選股清單
+            await fetchCustomGroups();
             await fetchUserStocks();
         };
 
-        // =====================================================
-        // 讀取使用者自選股
-        // =====================================================
+        function getCustomGroupValue(groupId) {
+            return "custom_" + String(groupId);
+        }
+
+        function getCustomGroupId(groupValue) {
+            const value = String(groupValue || "");
+
+            if (!value.startsWith("custom_")) {
+                return null;
+            }
+
+            const id = value.substring(7);
+
+            return id || null;
+        }
+
+        function isCustomGroupValue(groupValue) {
+            return String(
+                groupValue || ""
+            ).startsWith("custom_");
+        }
+
+        function getGroupDisplayName(groupId) {
+            return (
+                groupNameMap[groupId] ||
+                groupId ||
+                "未知分組"
+            );
+        }
+
+        function validateGroupName(groupName) {
+            const cleanName =
+                String(groupName || "").trim();
+
+            if (!cleanName) {
+                return {
+                    success: false,
+                    message: "請輸入分組名稱！"
+                };
+            }
+
+            if (cleanName.length > 30) {
+                return {
+                    success: false,
+                    message: "分組名稱不可超過 30 個字！"
+                };
+            }
+
+            if (
+                /[<>]/.test(cleanName)
+            ) {
+                return {
+                    success: false,
+                    message: "分組名稱不可包含 < 或 > 符號！"
+                };
+            }
+
+            const duplicateFixed =
+                Object.values(
+                    fixedGroupNameMap
+                ).some(
+                    name =>
+                        name.toLowerCase() ===
+                        cleanName.toLowerCase()
+                );
+
+            const duplicateCustom =
+                customGroups.some(
+                    group =>
+                        String(group.name)
+                            .trim()
+                            .toLowerCase() ===
+                        cleanName.toLowerCase()
+                );
+
+            if (
+                duplicateFixed ||
+                duplicateCustom
+            ) {
+                return {
+                    success: false,
+                    message: "已經存在相同名稱的分組！"
+                };
+            }
+
+            return {
+                success: true,
+                value: cleanName
+            };
+        }
+
+        async function fetchCustomGroups() {
+            if (!_supabase) {
+                renderCustomGroupList();
+                return;
+            }
+
+            if (
+                currentUserId ===
+                "BROWSER_TEST_USER"
+            ) {
+                if (
+                    customGroups.length === 0
+                ) {
+                    customGroups = [
+                        {
+                            id: "test-group-1",
+                            name: "長期觀察",
+                            line_user_id:
+                                "BROWSER_TEST_USER",
+                            ma1: 5,
+                            ma2: 10,
+                            ma3: 20,
+                            ma4: 60
+                        }
+                    ];
+                }
+
+                rebuildCustomGroupOptions();
+                renderCustomGroupList();
+                return;
+            }
+
+            const { data, error } =
+                await _supabase
+                    .from("groups")
+                    .select(
+                        "id, name, line_user_id, ma1, ma2, ma3, ma4"
+                    )
+                    .eq(
+                        "line_user_id",
+                        currentUserId
+                    )
+                    .order(
+                        "created_at",
+                        {
+                            ascending: true
+                        }
+                    );
+
+            if (error) {
+                console.error(error);
+
+                customGroups = [];
+
+                document.getElementById(
+                    "custom-group-list"
+                ).innerHTML = "";
+
+                const message =
+                    document.createElement("div");
+
+                message.className =
+                    "empty-group-message";
+
+                message.textContent =
+                    "❌ 自訂分組讀取失敗：" +
+                    error.message;
+
+                document.getElementById(
+                    "custom-group-list"
+                ).appendChild(message);
+
+                rebuildCustomGroupOptions();
+                return;
+            }
+
+            customGroups = data || [];
+
+            rebuildCustomGroupOptions();
+            renderCustomGroupList();
+        }
+
+        function rebuildCustomGroupOptions() {
+            Object.keys(groupNameMap).forEach(
+                key => {
+                    if (
+                        key.startsWith("custom_")
+                    ) {
+                        delete groupNameMap[key];
+                    }
+                }
+            );
+
+            const registerGroup =
+                document.getElementById(
+                    "reg-custom-group-options"
+                );
+
+            const filterGroup =
+                document.getElementById(
+                    "filter-custom-group-options"
+                );
+
+            const registerSelect =
+                document.getElementById(
+                    "reg-group"
+                );
+
+            const filterSelect =
+                document.getElementById(
+                    "list-filter"
+                );
+
+            const previousRegisterValue =
+                registerSelect.value;
+
+            const previousFilterValue =
+                filterSelect.value;
+
+            registerGroup.innerHTML = "";
+            filterGroup.innerHTML = "";
+
+            customGroups.forEach(group => {
+                const groupValue =
+                    getCustomGroupValue(
+                        group.id
+                    );
+
+                groupNameMap[groupValue] =
+                    group.name;
+
+                const registerOption =
+                    document.createElement(
+                        "option"
+                    );
+
+                registerOption.value =
+                    groupValue;
+
+                registerOption.textContent =
+                    "🗂️ " + group.name;
+
+                registerGroup.appendChild(
+                    registerOption
+                );
+
+                const filterOption =
+                    document.createElement(
+                        "option"
+                    );
+
+                filterOption.value =
+                    groupValue;
+
+                filterOption.textContent =
+                    "🗂️ " + group.name;
+
+                filterGroup.appendChild(
+                    filterOption
+                );
+            });
+
+            const registerValueExists =
+                Array.from(
+                    registerSelect.options
+                ).some(
+                    option =>
+                        option.value ===
+                        previousRegisterValue
+                );
+
+            if (registerValueExists) {
+                registerSelect.value =
+                    previousRegisterValue;
+            }
+
+            const filterValueExists =
+                Array.from(
+                    filterSelect.options
+                ).some(
+                    option =>
+                        option.value ===
+                        previousFilterValue
+                );
+
+            if (filterValueExists) {
+                filterSelect.value =
+                    previousFilterValue;
+            } else {
+                filterSelect.value = "all";
+            }
+
+            renderStockList();
+        }
+
+        function renderCustomGroupList() {
+            const container =
+                document.getElementById(
+                    "custom-group-list"
+                );
+
+            container.innerHTML = "";
+
+            if (customGroups.length === 0) {
+                const emptyMessage =
+                    document.createElement(
+                        "div"
+                    );
+
+                emptyMessage.className =
+                    "empty-group-message";
+
+                emptyMessage.textContent =
+                    "目前沒有自訂分組。";
+
+                container.appendChild(
+                    emptyMessage
+                );
+
+                return;
+            }
+
+            customGroups.forEach(group => {
+                const groupValue =
+                    getCustomGroupValue(
+                        group.id
+                    );
+
+                const stockCount =
+                    allUserStocks.filter(
+                        stock =>
+                            stock.group_id ===
+                            groupValue
+                    ).length;
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+                item.className =
+                    "custom-group-item";
+
+                const info =
+                    document.createElement(
+                        "div"
+                    );
+
+                info.className =
+                    "custom-group-info";
+
+                const nameElement =
+                    document.createElement(
+                        "div"
+                    );
+
+                nameElement.className =
+                    "custom-group-name";
+
+                nameElement.textContent =
+                    group.name;
+
+                const countElement =
+                    document.createElement(
+                        "div"
+                    );
+
+                countElement.className =
+                    "custom-group-count";
+
+                countElement.textContent =
+                    "目前共有 " +
+                    stockCount +
+                    " 檔股票";
+
+                info.appendChild(nameElement);
+                info.appendChild(countElement);
+
+                const actions =
+                    document.createElement(
+                        "div"
+                    );
+
+                actions.className =
+                    "custom-group-actions";
+
+                const editButton =
+                    document.createElement(
+                        "button"
+                    );
+
+                editButton.type = "button";
+
+                editButton.className =
+                    "group-action-btn group-edit-btn";
+
+                editButton.textContent =
+                    "改名";
+
+                editButton.addEventListener(
+                    "click",
+                    function() {
+                        renameCustomGroup(
+                            group,
+                            editButton
+                        );
+                    }
+                );
+
+                const deleteButton =
+                    document.createElement(
+                        "button"
+                    );
+
+                deleteButton.type = "button";
+
+                deleteButton.className =
+                    "group-action-btn group-delete-btn";
+
+                deleteButton.textContent =
+                    "刪除";
+
+                deleteButton.addEventListener(
+                    "click",
+                    function() {
+                        deleteCustomGroup(
+                            group,
+                            deleteButton
+                        );
+                    }
+                );
+
+                actions.appendChild(
+                    editButton
+                );
+
+                actions.appendChild(
+                    deleteButton
+                );
+
+                item.appendChild(info);
+                item.appendChild(actions);
+
+                container.appendChild(item);
+            });
+        }
+
+        async function createCustomGroup() {
+            const input =
+                document.getElementById(
+                    "new-group-name"
+                );
+
+            const button =
+                document.getElementById(
+                    "create-group-btn"
+                );
+
+            const validation =
+                validateGroupName(
+                    input.value
+                );
+
+            if (!validation.success) {
+                alert(validation.message);
+                return;
+            }
+
+            const groupName =
+                validation.value;
+
+            try {
+                button.disabled = true;
+                button.textContent =
+                    "新增中...";
+
+                if (
+                    currentUserId ===
+                    "BROWSER_TEST_USER"
+                ) {
+                    customGroups.push({
+                        id:
+                            "test-group-" +
+                            Date.now(),
+                        name: groupName,
+                        line_user_id:
+                            currentUserId,
+                        ma1: 5,
+                        ma2: 10,
+                        ma3: 20,
+                        ma4: 60
+                    });
+
+                    input.value = "";
+
+                    rebuildCustomGroupOptions();
+                    renderCustomGroupList();
+
+                    alert(
+                        "✅ 分組新增成功！\n" +
+                        "名稱：" +
+                        groupName
+                    );
+
+                    return;
+                }
+
+                if (!_supabase) {
+                    throw new Error(
+                        "Supabase 尚未就緒"
+                    );
+                }
+
+                const { data, error } =
+                    await _supabase
+                        .from("groups")
+                        .insert({
+                            name: groupName,
+                            line_user_id:
+                                currentUserId,
+                            ma1: 5,
+                            ma2: 10,
+                            ma3: 20,
+                            ma4: 60
+                        })
+                        .select(
+                            "id, name, line_user_id, ma1, ma2, ma3, ma4"
+                        )
+                        .single();
+
+                if (error) {
+                    throw error;
+                }
+
+                customGroups.push(data);
+
+                input.value = "";
+
+                rebuildCustomGroupOptions();
+                renderCustomGroupList();
+
+                alert(
+                    "✅ 分組新增成功！\n" +
+                    "名稱：" +
+                    groupName
+                );
+            } catch (error) {
+                console.error(error);
+
+                let message =
+                    error.message ||
+                    "未知錯誤";
+
+                if (
+                    message.includes("23505") ||
+                    message.includes(
+                        "duplicate key"
+                    )
+                ) {
+                    message =
+                        "已經存在相同名稱的分組。";
+                }
+
+                alert(
+                    "❌ 新增分組失敗：" +
+                    message
+                );
+            } finally {
+                button.disabled = false;
+                button.textContent =
+                    "新增分組";
+            }
+        }
+
+        async function renameCustomGroup(
+            group,
+            buttonElement
+        ) {
+            const newNameInput = prompt(
+                "請輸入新的分組名稱：",
+                group.name
+            );
+
+            if (newNameInput === null) {
+                return;
+            }
+
+            const cleanNewName =
+                String(
+                    newNameInput
+                ).trim();
+
+            if (
+                cleanNewName ===
+                String(group.name).trim()
+            ) {
+                return;
+            }
+
+            const validation =
+                validateGroupName(
+                    cleanNewName
+                );
+
+            if (!validation.success) {
+                alert(validation.message);
+                return;
+            }
+
+            const newName =
+                validation.value;
+
+            try {
+                buttonElement.disabled = true;
+                buttonElement.textContent =
+                    "修改中...";
+
+                if (
+                    currentUserId ===
+                    "BROWSER_TEST_USER"
+                ) {
+                    group.name = newName;
+
+                    rebuildCustomGroupOptions();
+                    renderCustomGroupList();
+                    renderStockList();
+
+                    alert(
+                        "✅ 分組名稱修改成功！"
+                    );
+
+                    return;
+                }
+
+                const { data, error } =
+                    await _supabase
+                        .from("groups")
+                        .update({
+                            name: newName
+                        })
+                        .eq(
+                            "id",
+                            group.id
+                        )
+                        .eq(
+                            "line_user_id",
+                            currentUserId
+                        )
+                        .select("id, name");
+
+                if (error) {
+                    throw error;
+                }
+
+                if (
+                    !data ||
+                    data.length === 0
+                ) {
+                    throw new Error(
+                        "找不到分組，或沒有修改權限。"
+                    );
+                }
+
+                group.name = newName;
+
+                rebuildCustomGroupOptions();
+                renderCustomGroupList();
+                renderStockList();
+
+                alert(
+                    "✅ 分組名稱修改成功！"
+                );
+            } catch (error) {
+                console.error(error);
+
+                alert(
+                    "❌ 修改分組失敗：" +
+                    (
+                        error.message ||
+                        "未知錯誤"
+                    )
+                );
+            } finally {
+                buttonElement.disabled = false;
+                buttonElement.textContent =
+                    "改名";
+            }
+        }
+
+        async function deleteCustomGroup(
+            group,
+            buttonElement
+        ) {
+            const groupValue =
+                getCustomGroupValue(
+                    group.id
+                );
+
+            const relatedStocks =
+                allUserStocks.filter(
+                    stock =>
+                        stock.group_id ===
+                        groupValue
+                );
+
+            if (relatedStocks.length > 0) {
+                alert(
+                    "❌ 無法刪除這個分組！\n\n" +
+                    "分組：" +
+                    group.name +
+                    "\n" +
+                    "目前仍有 " +
+                    relatedStocks.length +
+                    " 檔股票。\n\n" +
+                    "請先將股票移到其他分組，或刪除分組內的股票。"
+                );
+
+                return;
+            }
+
+            const confirmed = confirm(
+                "確定要刪除這個自訂分組嗎？\n\n" +
+                "分組：" +
+                group.name +
+                "\n\n" +
+                "刪除後無法復原。"
+            );
+
+            if (!confirmed) {
+                return;
+            }
+
+            try {
+                buttonElement.disabled = true;
+                buttonElement.textContent =
+                    "刪除中...";
+
+                if (
+                    currentUserId ===
+                    "BROWSER_TEST_USER"
+                ) {
+                    customGroups =
+                        customGroups.filter(
+                            item =>
+                                item.id !==
+                                group.id
+                        );
+
+                    rebuildCustomGroupOptions();
+                    renderCustomGroupList();
+
+                    alert(
+                        "✅ 分組已刪除！"
+                    );
+
+                    return;
+                }
+
+                const { data, error } =
+                    await _supabase
+                        .from("groups")
+                        .delete()
+                        .eq(
+                            "id",
+                            group.id
+                        )
+                        .eq(
+                            "line_user_id",
+                            currentUserId
+                        )
+                        .select("id");
+
+                if (error) {
+                    throw error;
+                }
+
+                if (
+                    !data ||
+                    data.length === 0
+                ) {
+                    throw new Error(
+                        "找不到分組，或沒有刪除權限。"
+                    );
+                }
+
+                customGroups =
+                    customGroups.filter(
+                        item =>
+                            item.id !==
+                            group.id
+                    );
+
+                rebuildCustomGroupOptions();
+                renderCustomGroupList();
+
+                alert(
+                    "✅ 分組已刪除！"
+                );
+            } catch (error) {
+                console.error(error);
+
+                alert(
+                    "❌ 刪除分組失敗：" +
+                    (
+                        error.message ||
+                        "未知錯誤"
+                    )
+                );
+
+                buttonElement.disabled =
+                    false;
+
+                buttonElement.textContent =
+                    "刪除";
+            }
+        }
+
         async function fetchUserStocks() {
             if (!_supabase) {
                 showListMessage(
@@ -653,15 +1633,16 @@
                 return;
             }
 
-            // 瀏覽器測試模式
             if (
                 currentUserId ===
                 "BROWSER_TEST_USER"
             ) {
-                if (allUserStocks.length === 0) {
+                if (
+                    allUserStocks.length === 0
+                ) {
                     allUserStocks = [
                         {
-                            id: "test-1",
+                            id: "test-stock-1",
                             ticker: "2330.TW",
                             group_id: "tw_g1",
                             ma1: 20,
@@ -670,7 +1651,7 @@
                             ma4: 0
                         },
                         {
-                            id: "test-2",
+                            id: "test-stock-2",
                             ticker: "2330.TW",
                             group_id: "tw_g2",
                             ma1: 5,
@@ -679,7 +1660,7 @@
                             ma4: 0
                         },
                         {
-                            id: "test-3",
+                            id: "test-stock-3",
                             ticker: "AAPL",
                             group_id: "us_g1",
                             ma1: 50,
@@ -688,9 +1669,27 @@
                             ma4: 0
                         }
                     ];
+
+                    if (
+                        customGroups.length > 0
+                    ) {
+                        allUserStocks.push({
+                            id: "test-stock-4",
+                            ticker: "MSFT",
+                            group_id:
+                                getCustomGroupValue(
+                                    customGroups[0].id
+                                ),
+                            ma1: 20,
+                            ma2: 60,
+                            ma3: 120,
+                            ma4: 0
+                        });
+                    }
                 }
 
                 renderStockList();
+                renderCustomGroupList();
                 return;
             }
 
@@ -711,6 +1710,12 @@
                     .neq(
                         "group_id",
                         "admin_index"
+                    )
+                    .order(
+                        "ticker",
+                        {
+                            ascending: true
+                        }
                     );
 
             if (error) {
@@ -727,11 +1732,9 @@
             allUserStocks = data || [];
 
             renderStockList();
+            renderCustomGroupList();
         }
 
-        // =====================================================
-        // 顯示清單提示
-        // =====================================================
         function showListMessage(message) {
             const tbody =
                 document.getElementById(
@@ -756,14 +1759,15 @@
             tbody.appendChild(tr);
         }
 
-        // =====================================================
-        // 顯示自選股清單
-        // =====================================================
         function renderStockList() {
             const tbody =
                 document.getElementById(
                     "stock-list-body"
                 );
+
+            if (!tbody) {
+                return;
+            }
 
             const filterValue =
                 document.getElementById(
@@ -775,53 +1779,58 @@
                     "stock-search"
                 );
 
-            const keyword = searchElement
-                ? searchElement.value
-                    .trim()
-                    .toUpperCase()
-                : "";
+            const keyword =
+                searchElement
+                    ? searchElement.value
+                        .trim()
+                        .toUpperCase()
+                    : "";
 
             tbody.innerHTML = "";
 
             const filteredStocks =
-                allUserStocks.filter(stock => {
-                    const ticker =
-                        String(
-                            stock.ticker || ""
-                        ).toUpperCase();
+                allUserStocks.filter(
+                    stock => {
+                        const ticker =
+                            String(
+                                stock.ticker || ""
+                            ).toUpperCase();
 
-                    const groupDisplay =
-                        String(
-                            groupNameMap[
-                                stock.group_id
-                            ] ||
-                            stock.group_id ||
-                            ""
-                        ).toUpperCase();
+                        const groupDisplay =
+                            String(
+                                getGroupDisplayName(
+                                    stock.group_id
+                                )
+                            ).toUpperCase();
 
-                    const groupId =
-                        String(
-                            stock.group_id || ""
-                        ).toUpperCase();
+                        const groupId =
+                            String(
+                                stock.group_id || ""
+                            ).toUpperCase();
 
-                    const matchGroup =
-                        filterValue === "all" ||
-                        stock.group_id ===
-                            filterValue;
+                        const matchGroup =
+                            filterValue === "all" ||
+                            stock.group_id ===
+                                filterValue;
 
-                    const matchKeyword =
-                        !keyword ||
-                        ticker.includes(keyword) ||
-                        groupDisplay.includes(
-                            keyword
-                        ) ||
-                        groupId.includes(keyword);
+                        const matchKeyword =
+                            !keyword ||
+                            ticker.includes(
+                                keyword
+                            ) ||
+                            groupDisplay.includes(
+                                keyword
+                            ) ||
+                            groupId.includes(
+                                keyword
+                            );
 
-                    return (
-                        matchGroup &&
-                        matchKeyword
-                    );
-                });
+                        return (
+                            matchGroup &&
+                            matchKeyword
+                        );
+                    }
+                );
 
             document.getElementById(
                 "list-summary"
@@ -852,23 +1861,21 @@
                         stock.ma4
                     ]
                         .filter(
-                            num =>
-                                Number(num) > 0
+                            number =>
+                                Number(number) > 0
                         )
                         .join(", ");
 
                     const groupDisplay =
-                        groupNameMap[
+                        getGroupDisplayName(
                             stock.group_id
-                        ] ||
-                        stock.group_id;
+                        );
 
                     const tr =
                         document.createElement(
                             "tr"
                         );
 
-                    // 編號
                     const numberTd =
                         document.createElement(
                             "td"
@@ -880,7 +1887,6 @@
                     numberTd.textContent =
                         index + 1;
 
-                    // 股票代號
                     const tickerTd =
                         document.createElement(
                             "td"
@@ -895,14 +1901,17 @@
                     tickerTd.textContent =
                         stock.ticker;
 
-                    // 群組
                     const groupTd =
                         document.createElement(
                             "td"
                         );
 
                     groupTd.style.color =
-                        "#00b0ff";
+                        isCustomGroupValue(
+                            stock.group_id
+                        )
+                            ? "#e1bee7"
+                            : "#00b0ff";
 
                     groupTd.style.fontSize =
                         "12px";
@@ -910,7 +1919,6 @@
                     groupTd.textContent =
                         groupDisplay;
 
-                    // 均線
                     const masTd =
                         document.createElement(
                             "td"
@@ -919,7 +1927,6 @@
                     masTd.textContent =
                         mas || "未設定";
 
-                    // 操作
                     const actionTd =
                         document.createElement(
                             "td"
@@ -933,8 +1940,7 @@
                             "button"
                         );
 
-                    editButton.type =
-                        "button";
+                    editButton.type = "button";
 
                     editButton.className =
                         "action-btn edit-btn";
@@ -956,8 +1962,7 @@
                             "button"
                         );
 
-                    deleteButton.type =
-                        "button";
+                    deleteButton.type = "button";
 
                     deleteButton.className =
                         "action-btn delete-btn";
@@ -994,9 +1999,6 @@
             );
         }
 
-        // =====================================================
-        // 清除搜尋
-        // =====================================================
         function clearStockSearch() {
             document.getElementById(
                 "stock-search"
@@ -1005,10 +2007,26 @@
             renderStockList();
         }
 
-        // =====================================================
-        // 進入編輯模式
-        // =====================================================
         function editUserStock(stock) {
+            const groupExists =
+                Array.from(
+                    document.getElementById(
+                        "reg-group"
+                    ).options
+                ).some(
+                    option =>
+                        option.value ===
+                        stock.group_id
+                );
+
+            if (!groupExists) {
+                alert(
+                    "❌ 這筆股票所屬的分組不存在，請先確認分組資料。"
+                );
+
+                return;
+            }
+
             const mas = [
                 stock.ma1,
                 stock.ma2,
@@ -1016,7 +2034,8 @@
                 stock.ma4
             ]
                 .filter(
-                    num => Number(num) > 0
+                    number =>
+                        Number(number) > 0
                 )
                 .join(",");
 
@@ -1070,9 +2089,6 @@
             });
         }
 
-        // =====================================================
-        // 取消編輯
-        // =====================================================
         function cancelEditStock() {
             editingStockId = null;
             editingTicker = null;
@@ -1109,11 +2125,9 @@
                 "儲存自選股設定";
         }
 
-        // =====================================================
-        // 均線參數驗證
-        // =====================================================
         function parseMovingAverages(value) {
-            const masStr = value.trim();
+            const masStr =
+                String(value || "").trim();
 
             if (!masStr) {
                 return {
@@ -1155,13 +2169,14 @@
                 rawValues.map(Number);
 
             const hasInvalidValue =
-                masArray.some(num => {
-                    return (
-                        !Number.isInteger(num) ||
-                        num <= 0 ||
-                        num > 1000
-                    );
-                });
+                masArray.some(
+                    number =>
+                        !Number.isInteger(
+                            number
+                        ) ||
+                        number <= 0 ||
+                        number > 1000
+                );
 
             if (hasInvalidValue) {
                 return {
@@ -1188,9 +2203,6 @@
             };
         }
 
-        // =====================================================
-        // 儲存或修改使用者自選股
-        // =====================================================
         async function saveUserStock() {
             if (!_supabase) {
                 return alert(
@@ -1226,6 +2238,12 @@
             if (!ticker || !masStr) {
                 return alert(
                     "請填寫代號與均線！"
+                );
+            }
+
+            if (!groupId) {
+                return alert(
+                    "請選擇分組！"
                 );
             }
 
@@ -1276,7 +2294,6 @@
                         ? "修改中..."
                         : "儲存中...";
 
-                // 瀏覽器測試模式
                 if (
                     currentUserId ===
                     "BROWSER_TEST_USER"
@@ -1296,7 +2313,7 @@
                         if (duplicateStock) {
                             throw new Error(
                                 ticker +
-                                " 已經存在於這個群組中。"
+                                " 已經存在於這個分組中。"
                             );
                         }
 
@@ -1351,7 +2368,7 @@
                         } else {
                             allUserStocks.push({
                                 id:
-                                    "test-" +
+                                    "test-stock-" +
                                     Date.now() +
                                     "-" +
                                     Math.random()
@@ -1369,30 +2386,25 @@
 
                     cancelEditStock();
                     renderStockList();
+                    renderCustomGroupList();
 
                     alert(
                         isEditing
                             ? (
                                 "✅ 修改成功！\n" +
-                                "代號: " +
+                                "代號：" +
                                 ticker +
-                                "\n群組: " +
-                                (
-                                    groupNameMap[
-                                        groupId
-                                    ] ||
+                                "\n分組：" +
+                                getGroupDisplayName(
                                     groupId
                                 )
                             )
                             : (
                                 "🎉 儲存成功！\n" +
-                                "代號: " +
+                                "代號：" +
                                 ticker +
-                                "\n群組: " +
-                                (
-                                    groupNameMap[
-                                        groupId
-                                    ] ||
+                                "\n分組：" +
+                                getGroupDisplayName(
                                     groupId
                                 )
                             )
@@ -1402,8 +2414,6 @@
                 }
 
                 if (isEditing) {
-                    // 編輯模式：
-                    // 使用資料 id 精確修改單一資料
                     const {
                         data,
                         error
@@ -1433,9 +2443,6 @@
                         );
                     }
                 } else {
-                    // 新增模式：
-                    // 同一股票可以存在於不同群組
-                    // 同一使用者＋股票＋群組不重複
                     const { error } =
                         await _supabase
                             .from("stocks")
@@ -1458,25 +2465,19 @@
                     isEditing
                         ? (
                             "✅ 修改成功！\n" +
-                            "代號: " +
+                            "代號：" +
                             ticker +
-                            "\n群組: " +
-                            (
-                                groupNameMap[
-                                    groupId
-                                ] ||
+                            "\n分組：" +
+                            getGroupDisplayName(
                                 groupId
                             )
                         )
                         : (
                             "🎉 儲存成功！\n" +
-                            "代號: " +
+                            "代號：" +
                             ticker +
-                            "\n群組: " +
-                            (
-                                groupNameMap[
-                                    groupId
-                                ] ||
+                            "\n分組：" +
+                            getGroupDisplayName(
                                 groupId
                             )
                         )
@@ -1491,26 +2492,21 @@
                     "未知錯誤";
 
                 if (
-                    message.includes(
-                        "stocks_line_user_id_ticker_group_key"
-                    ) ||
+                    message.includes("23505") ||
                     message.includes(
                         "duplicate key value"
                     ) ||
                     message.includes(
-                        "23505"
+                        "stocks_line_user_id_ticker_group_key"
                     )
                 ) {
                     message =
                         ticker +
                         " 已經存在於「" +
-                        (
-                            groupNameMap[
-                                groupId
-                            ] ||
+                        getGroupDisplayName(
                             groupId
                         ) +
-                        "」群組中。";
+                        "」分組中。";
                 }
 
                 alert(
@@ -1527,35 +2523,30 @@
             }
         }
 
-        // =====================================================
-        // 精確刪除單一群組中的股票
-        // =====================================================
         async function deleteUserStock(
             stock,
             buttonElement
         ) {
             const groupDisplay =
-                groupNameMap[
+                getGroupDisplayName(
                     stock.group_id
-                ] ||
-                stock.group_id;
+                );
 
             const confirmed = confirm(
                 "確定要刪除以下自選股嗎？\n\n" +
                 "股票：" +
                 stock.ticker +
                 "\n" +
-                "群組：" +
+                "分組：" +
                 groupDisplay +
                 "\n\n" +
-                "其他群組中的相同股票不會被刪除。"
+                "其他分組中的相同股票不會被刪除。"
             );
 
             if (!confirmed) {
                 return;
             }
 
-            // 瀏覽器測試模式
             if (
                 currentUserId ===
                 "BROWSER_TEST_USER"
@@ -1575,13 +2566,13 @@
                 }
 
                 renderStockList();
+                renderCustomGroupList();
 
                 alert(
                     "✅ 已刪除\n" +
                     "股票：" +
                     stock.ticker +
-                    "\n" +
-                    "群組：" +
+                    "\n分組：" +
                     groupDisplay
                 );
 
@@ -1613,7 +2604,6 @@
                 buttonElement.textContent =
                     "刪除中...";
 
-                // 使用 id 精確刪除單一資料
                 const {
                     data,
                     error
@@ -1658,13 +2648,13 @@
                 }
 
                 renderStockList();
+                renderCustomGroupList();
 
                 alert(
                     "✅ 已刪除\n" +
                     "股票：" +
                     stock.ticker +
-                    "\n" +
-                    "群組：" +
+                    "\n分組：" +
                     groupDisplay
                 );
             } catch (error) {
@@ -1686,10 +2676,6 @@
             }
         }
 
-        // =====================================================
-        // 儲存管理員大盤設定
-        // 原本功能保留
-        // =====================================================
         async function saveAdminStock() {
             if (!_supabase) {
                 return alert(
@@ -1777,10 +2763,9 @@
 
                 alert(
                     "👑 大盤參數更新成功！\n" +
-                    "名稱: " +
+                    "名稱：" +
                     cleanName +
-                    "\n" +
-                    "代號: " +
+                    "\n代號：" +
                     ticker
                 );
 
@@ -1791,7 +2776,7 @@
                 console.error(error);
 
                 alert(
-                    "❌ 大盤參數寫入失敗: " +
+                    "❌ 大盤參數寫入失敗：" +
                     (
                         error.message ||
                         "未知錯誤"
