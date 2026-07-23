@@ -3,7 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <title>自選股均線參數控制台</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
     <style>
         body {
@@ -160,6 +163,7 @@
             padding: 8px;
             margin-bottom: 8px;
             font-size: 13px;
+            line-height: 1.5;
         }
 
         @media (max-width: 600px) {
@@ -189,8 +193,14 @@
 
 <body>
 
-    <div class="header" style="background: #00b0ff;">
-        <h2 style="margin: 0; color: #fff;">⚙️ 自選股均線參數控制台</h2>
+    <!-- 頁首 -->
+    <div
+        class="header"
+        style="background: #00b0ff;"
+    >
+        <h2 style="margin: 0; color: #fff;">
+            ⚙️ 自選股均線參數控制台
+        </h2>
 
         <p
             id="liff-status"
@@ -221,8 +231,13 @@
             ➕ 新增/修改 我的自選股
         </div>
 
-        <div id="editing-message" class="editing-message">
-            ✏️ 目前正在編輯自選股。股票代號不可修改，如需更換代號，請新增另一筆資料。
+        <div
+            id="editing-message"
+            class="editing-message"
+        >
+            ✏️ 目前正在編輯這一筆自選股設定。<br>
+            股票代號不可修改，但可以修改群組及均線參數。<br>
+            修改不會影響其他群組中的相同股票。
         </div>
 
         <input
@@ -233,13 +248,33 @@
             autocomplete="off"
         >
 
-        <select id="reg-group" class="form-input">
-            <option value="tw_g1">🇹🇼 台股 - 權值精選</option>
-            <option value="tw_g2">🇹🇼 台股 - 熱門</option>
-            <option value="us_g1">🇺🇸 美股 - 權值精選</option>
-            <option value="us_g2">🇺🇸 美股 - 低本益比</option>
-            <option value="us_g3">🇺🇸 美股 - 超級績效</option>
-            <option value="us_g4">🇺🇸 美股 - 熱門</option>
+        <select
+            id="reg-group"
+            class="form-input"
+        >
+            <option value="tw_g1">
+                🇹🇼 台股 - 權值精選
+            </option>
+
+            <option value="tw_g2">
+                🇹🇼 台股 - 熱門
+            </option>
+
+            <option value="us_g1">
+                🇺🇸 美股 - 權值精選
+            </option>
+
+            <option value="us_g2">
+                🇺🇸 美股 - 低本益比
+            </option>
+
+            <option value="us_g3">
+                🇺🇸 美股 - 超級績效
+            </option>
+
+            <option value="us_g4">
+                🇺🇸 美股 - 熱門
+            </option>
         </select>
 
         <input
@@ -289,27 +324,59 @@
             style="font-size: 14px;"
         >
             <optgroup label="🇹🇼 台灣股市">
-                <option value="^TWII">台灣加權指數 (^TWII)</option>
-                <option value="^TWOII">櫃買指數 (^TWOII)</option>
+                <option value="^TWII">
+                    台灣加權指數 (^TWII)
+                </option>
+
+                <option value="^TWOII">
+                    櫃買指數 (^TWOII)
+                </option>
             </optgroup>
 
             <optgroup label="🇺🇸 美國股市">
-                <option value="^GSPC">標普500 (^GSPC)</option>
-                <option value="^IXIC">那斯達克 (^IXIC)</option>
-                <option value="^IXIC">那斯達克 (^IXIC)</option>
-                <option value="^RUT">羅素2000 (^RUT)</option>
-                <option value="^SOX">費城半導體 (^SOX)</option>
+                <option value="^GSPC">
+                    標普500 (^GSPC)
+                </option>
+
+                <option value="^IXIC">
+                    那斯達克 (^IXIC)
+                </option>
+
+                <option value="^IXIC">
+                    那斯達克 (^IXIC)
+                </option>
+
+                <option value="^RUT">
+                    羅素2000 (^RUT)
+                </option>
+
+                <option value="^SOX">
+                    費城半導體 (^SOX)
+                </option>
             </optgroup>
 
             <optgroup label="🇪🇺 歐洲股市">
-                <option value="^FCHI">法國 CAC40 (^FCHI)</option>
-                <option value="^FTSE">英國富時100 (^FTSE)</option>
-                <option value="^GDAXI">德國 DAX (^GDAXI)</option>
+                <option value="^FCHI">
+                    法國 CAC40 (^FCHI)
+                </option>
+
+                <option value="^FTSE">
+                    英國富時100 (^FTSE)
+                </option>
+
+                <option value="^GDAXI">
+                    德國 DAX (^GDAXI)
+                </option>
             </optgroup>
 
             <optgroup label="🌏 亞洲股市">
-                <option value="^N225">日經225 (^N225)</option>
-                <option value="^KS11">韓國 KOSPI (^KS11)</option>
+                <option value="^N225">
+                    日經225 (^N225)
+                </option>
+
+                <option value="^KS11">
+                    韓國 KOSPI (^KS11)
+                </option>
             </optgroup>
         </select>
 
@@ -349,17 +416,37 @@
                 style="width: auto; padding: 4px 8px; margin: 0; font-size: 13px;"
                 onchange="renderStockList()"
             >
-                <option value="all">👀 顯示全部</option>
-                <option value="tw_g1">🇹🇼 台股 - 權值</option>
-                <option value="tw_g2">🇹🇼 台股 - 熱門</option>
-                <option value="us_g1">🇺🇸 美股 - 權值</option>
-                <option value="us_g2">🇺🇸 美股 - 低本</option>
-                <option value="us_g3">🇺🇸 美股 - 績效</option>
-                <option value="us_g4">🇺🇸 美股 - 熱門</option>
+                <option value="all">
+                    👀 顯示全部
+                </option>
+
+                <option value="tw_g1">
+                    🇹🇼 台股 - 權值
+                </option>
+
+                <option value="tw_g2">
+                    🇹🇼 台股 - 熱門
+                </option>
+
+                <option value="us_g1">
+                    🇺🇸 美股 - 權值
+                </option>
+
+                <option value="us_g2">
+                    🇺🇸 美股 - 低本
+                </option>
+
+                <option value="us_g3">
+                    🇺🇸 美股 - 績效
+                </option>
+
+                <option value="us_g4">
+                    🇺🇸 美股 - 熱門
+                </option>
             </select>
         </div>
 
-        <!-- 新增：搜尋工具列 -->
+        <!-- 搜尋列 -->
         <div class="list-toolbar">
             <input
                 type="search"
@@ -379,7 +466,10 @@
             </button>
         </div>
 
-        <div id="list-summary" class="list-summary">
+        <div
+            id="list-summary"
+            class="list-summary"
+        >
             資料載入中...
         </div>
 
@@ -411,7 +501,13 @@
 
     <script>
         // 手機即時除錯盾牌
-        window.onerror = function(message, source, lineno, colno, error) {
+        window.onerror = function(
+            message,
+            source,
+            lineno,
+            colno,
+            error
+        ) {
             alert(
                 "🚨 網頁出錯了！\n" +
                 "錯誤訊息: " + message + "\n" +
@@ -432,7 +528,8 @@
         const SUPABASE_ANON_KEY =
             "sb_publishable_eEJNM_96jblQ_90vpcYC0g_PzyGJNOK";
 
-        const LIFF_ID = "2010330411-SbwvRXRN";
+        const LIFF_ID =
+            "2010330411-SbwvRXRN";
 
         const ADMIN_LINE_ID =
             "Ua0037dbd5037b64fc76804c60520ad76";
@@ -441,8 +538,10 @@
         let currentUserId = "GUEST";
         let allUserStocks = [];
 
-        // 用來記錄目前是否正在編輯
+        // 編輯中的資料
+        let editingStockId = null;
         let editingTicker = null;
+        let editingOriginalGroupId = null;
 
         const groupNameMap = {
             "tw_g1": "台股權值",
@@ -454,88 +553,115 @@
         };
 
         window.onload = async function() {
-            // 嘗試初始化 Supabase
+            // 初始化 Supabase
             try {
                 _supabase = supabase.createClient(
                     SUPABASE_URL,
                     SUPABASE_ANON_KEY
                 );
-            } catch (e) {
-                alert("Supabase 連線失敗: " + e.message);
+            } catch (error) {
+                alert(
+                    "Supabase 連線失敗: " +
+                    error.message
+                );
             }
 
-            // 嘗試初始化 LINE LIFF
+            // 初始化 LINE LIFF
             try {
                 await liff.init({
                     liffId: LIFF_ID
                 });
 
                 if (liff.isLoggedIn()) {
-                    const profile = await liff.getProfile();
+                    const profile =
+                        await liff.getProfile();
 
-                    // 強制清除可能存在的隱形空白
-                    currentUserId = profile.userId.trim();
+                    currentUserId =
+                        profile.userId.trim();
 
-                    document.getElementById("liff-status").innerText =
-                        "👤 已登入: " + profile.displayName;
+                    document.getElementById(
+                        "liff-status"
+                    ).innerText =
+                        "👤 已登入: " +
+                        profile.displayName;
 
-                    document.getElementById("user-id-display").innerText =
+                    document.getElementById(
+                        "user-id-display"
+                    ).innerText =
                         "ID: " + currentUserId;
 
-                    // 管理員權限畫面檢查
+                    // 管理員畫面檢查
                     if (
-                        currentUserId === ADMIN_LINE_ID.trim()
+                        currentUserId ===
+                        ADMIN_LINE_ID.trim()
                     ) {
                         document.getElementById(
                             "admin-panel"
                         ).style.display = "block";
                     }
                 } else {
-                    document.getElementById("liff-status").innerText =
+                    document.getElementById(
+                        "liff-status"
+                    ).innerText =
                         "⚠️ 測試模式 (未在 LINE 內登入)";
 
-                    currentUserId = "BROWSER_TEST_USER";
+                    currentUserId =
+                        "BROWSER_TEST_USER";
 
                     document.getElementById(
                         "user-id-display"
-                    ).innerText = "ID: BROWSER_TEST_USER";
+                    ).innerText =
+                        "ID: BROWSER_TEST_USER";
 
-                    // 電腦預覽測試時也給予管理員畫面
+                    // 電腦預覽測試時顯示管理員畫面
                     document.getElementById(
                         "admin-panel"
                     ).style.display = "block";
                 }
-            } catch (err) {
-                document.getElementById("liff-status").innerText =
+            } catch (error) {
+                document.getElementById(
+                    "liff-status"
+                ).innerText =
                     "ℹ️ 瀏覽器預覽模式";
 
-                currentUserId = "BROWSER_TEST_USER";
+                currentUserId =
+                    "BROWSER_TEST_USER";
 
                 document.getElementById(
                     "user-id-display"
-                ).innerText = "ID: BROWSER_TEST_USER";
+                ).innerText =
+                    "ID: BROWSER_TEST_USER";
 
                 document.getElementById(
                     "admin-panel"
                 ).style.display = "block";
             }
 
-            // 撈取資料庫清單
-            fetchUserStocks();
+            // 撈取自選股清單
+            await fetchUserStocks();
         };
 
+        // =====================================================
+        // 讀取使用者自選股
+        // =====================================================
         async function fetchUserStocks() {
             if (!_supabase) {
-                showListMessage("Supabase 尚未就緒。");
+                showListMessage(
+                    "Supabase 尚未就緒。"
+                );
+
                 return;
             }
 
-            // 測試模式的假資料
-            if (currentUserId === "BROWSER_TEST_USER") {
-                // 只有第一次進入時才建立假資料
+            // 瀏覽器測試模式
+            if (
+                currentUserId ===
+                "BROWSER_TEST_USER"
+            ) {
                 if (allUserStocks.length === 0) {
                     allUserStocks = [
                         {
+                            id: "test-1",
                             ticker: "2330.TW",
                             group_id: "tw_g1",
                             ma1: 20,
@@ -544,6 +670,16 @@
                             ma4: 0
                         },
                         {
+                            id: "test-2",
+                            ticker: "2330.TW",
+                            group_id: "tw_g2",
+                            ma1: 5,
+                            ma2: 20,
+                            ma3: 60,
+                            ma4: 0
+                        },
+                        {
+                            id: "test-3",
                             ticker: "AAPL",
                             group_id: "us_g1",
                             ma1: 50,
@@ -558,35 +694,57 @@
                 return;
             }
 
-            showListMessage("資料載入中...");
+            showListMessage(
+                "資料載入中..."
+            );
 
-            const { data, error } = await _supabase
-                .from("stocks")
-                .select("ticker, group_id, ma1, ma2, ma3, ma4")
-                .eq("line_user_id", currentUserId)
-                .neq("group_id", "admin_index");
+            const { data, error } =
+                await _supabase
+                    .from("stocks")
+                    .select(
+                        "id, ticker, group_id, ma1, ma2, ma3, ma4"
+                    )
+                    .eq(
+                        "line_user_id",
+                        currentUserId
+                    )
+                    .neq(
+                        "group_id",
+                        "admin_index"
+                    );
 
             if (error) {
                 console.error(error);
+
                 showListMessage(
-                    "❌ 清單讀取失敗：" + error.message
+                    "❌ 清單讀取失敗：" +
+                    error.message
                 );
+
                 return;
             }
 
             allUserStocks = data || [];
+
             renderStockList();
         }
 
+        // =====================================================
+        // 顯示清單提示
+        // =====================================================
         function showListMessage(message) {
-            const tbody = document.getElementById(
-                "stock-list-body"
-            );
+            const tbody =
+                document.getElementById(
+                    "stock-list-body"
+                );
 
             tbody.innerHTML = "";
 
-            const tr = document.createElement("tr");
-            const td = document.createElement("td");
+            const tr =
+                document.createElement("tr");
+
+            const td =
+                document.createElement("td");
 
             td.colSpan = 5;
             td.style.textAlign = "center";
@@ -598,61 +756,85 @@
             tbody.appendChild(tr);
         }
 
+        // =====================================================
+        // 顯示自選股清單
+        // =====================================================
         function renderStockList() {
-            const tbody = document.getElementById(
-                "stock-list-body"
-            );
+            const tbody =
+                document.getElementById(
+                    "stock-list-body"
+                );
 
-            const filterValue = document.getElementById(
-                "list-filter"
-            ).value;
+            const filterValue =
+                document.getElementById(
+                    "list-filter"
+                ).value;
 
-            const searchElement = document.getElementById(
-                "stock-search"
-            );
+            const searchElement =
+                document.getElementById(
+                    "stock-search"
+                );
 
             const keyword = searchElement
-                ? searchElement.value.trim().toUpperCase()
+                ? searchElement.value
+                    .trim()
+                    .toUpperCase()
                 : "";
 
             tbody.innerHTML = "";
 
-            const filteredStocks = allUserStocks.filter(stock => {
-                const ticker = String(
-                    stock.ticker || ""
-                ).toUpperCase();
+            const filteredStocks =
+                allUserStocks.filter(stock => {
+                    const ticker =
+                        String(
+                            stock.ticker || ""
+                        ).toUpperCase();
 
-                const groupDisplay = String(
-                    groupNameMap[stock.group_id] ||
-                    stock.group_id ||
-                    ""
-                ).toUpperCase();
+                    const groupDisplay =
+                        String(
+                            groupNameMap[
+                                stock.group_id
+                            ] ||
+                            stock.group_id ||
+                            ""
+                        ).toUpperCase();
 
-                const groupId = String(
-                    stock.group_id || ""
-                ).toUpperCase();
+                    const groupId =
+                        String(
+                            stock.group_id || ""
+                        ).toUpperCase();
 
-                const matchGroup =
-                    filterValue === "all" ||
-                    stock.group_id === filterValue;
+                    const matchGroup =
+                        filterValue === "all" ||
+                        stock.group_id ===
+                            filterValue;
 
-                const matchKeyword =
-                    !keyword ||
-                    ticker.includes(keyword) ||
-                    groupDisplay.includes(keyword) ||
-                    groupId.includes(keyword);
+                    const matchKeyword =
+                        !keyword ||
+                        ticker.includes(keyword) ||
+                        groupDisplay.includes(
+                            keyword
+                        ) ||
+                        groupId.includes(keyword);
 
-                return matchGroup && matchKeyword;
-            });
+                    return (
+                        matchGroup &&
+                        matchKeyword
+                    );
+                });
 
-            document.getElementById("list-summary").innerText =
+            document.getElementById(
+                "list-summary"
+            ).innerText =
                 "目前顯示 " +
                 filteredStocks.length +
                 " 筆，共 " +
                 allUserStocks.length +
                 " 筆自選股";
 
-            if (filteredStocks.length === 0) {
+            if (
+                filteredStocks.length === 0
+            ) {
                 const message = keyword
                     ? "找不到符合搜尋條件的股票。"
                     : "此分類目前無追蹤股票。";
@@ -661,90 +843,160 @@
                 return;
             }
 
-            filteredStocks.forEach((stock, index) => {
-                const mas = [
-                    stock.ma1,
-                    stock.ma2,
-                    stock.ma3,
-                    stock.ma4
-                ]
-                    .filter(num => Number(num) > 0)
-                    .join(", ");
+            filteredStocks.forEach(
+                (stock, index) => {
+                    const mas = [
+                        stock.ma1,
+                        stock.ma2,
+                        stock.ma3,
+                        stock.ma4
+                    ]
+                        .filter(
+                            num =>
+                                Number(num) > 0
+                        )
+                        .join(", ");
 
-                const groupDisplay =
-                    groupNameMap[stock.group_id] ||
-                    stock.group_id;
+                    const groupDisplay =
+                        groupNameMap[
+                            stock.group_id
+                        ] ||
+                        stock.group_id;
 
-                const tr = document.createElement("tr");
-
-                // 編號
-                const numberTd = document.createElement("td");
-                numberTd.style.color = "#888";
-                numberTd.textContent = index + 1;
-
-                // 股票代號
-                const tickerTd = document.createElement("td");
-                tickerTd.style.fontWeight = "bold";
-                tickerTd.style.color = "#00ff88";
-                tickerTd.textContent = stock.ticker;
-
-                // 群組
-                const groupTd = document.createElement("td");
-                groupTd.style.color = "#00b0ff";
-                groupTd.style.fontSize = "12px";
-                groupTd.textContent = groupDisplay;
-
-                // 均線
-                const masTd = document.createElement("td");
-                masTd.textContent = mas || "未設定";
-
-                // 操作
-                const actionTd = document.createElement("td");
-                actionTd.style.whiteSpace = "nowrap";
-
-                const editButton =
-                    document.createElement("button");
-
-                editButton.type = "button";
-                editButton.className =
-                    "action-btn edit-btn";
-                editButton.textContent = "編輯";
-
-                editButton.addEventListener("click", function() {
-                    editUserStock(stock);
-                });
-
-                const deleteButton =
-                    document.createElement("button");
-
-                deleteButton.type = "button";
-                deleteButton.className =
-                    "action-btn delete-btn";
-                deleteButton.textContent = "刪除";
-
-                deleteButton.addEventListener(
-                    "click",
-                    function() {
-                        deleteUserStock(
-                            stock.ticker,
-                            deleteButton
+                    const tr =
+                        document.createElement(
+                            "tr"
                         );
-                    }
-                );
 
-                actionTd.appendChild(editButton);
-                actionTd.appendChild(deleteButton);
+                    // 編號
+                    const numberTd =
+                        document.createElement(
+                            "td"
+                        );
 
-                tr.appendChild(numberTd);
-                tr.appendChild(tickerTd);
-                tr.appendChild(groupTd);
-                tr.appendChild(masTd);
-                tr.appendChild(actionTd);
+                    numberTd.style.color =
+                        "#888";
 
-                tbody.appendChild(tr);
-            });
+                    numberTd.textContent =
+                        index + 1;
+
+                    // 股票代號
+                    const tickerTd =
+                        document.createElement(
+                            "td"
+                        );
+
+                    tickerTd.style.fontWeight =
+                        "bold";
+
+                    tickerTd.style.color =
+                        "#00ff88";
+
+                    tickerTd.textContent =
+                        stock.ticker;
+
+                    // 群組
+                    const groupTd =
+                        document.createElement(
+                            "td"
+                        );
+
+                    groupTd.style.color =
+                        "#00b0ff";
+
+                    groupTd.style.fontSize =
+                        "12px";
+
+                    groupTd.textContent =
+                        groupDisplay;
+
+                    // 均線
+                    const masTd =
+                        document.createElement(
+                            "td"
+                        );
+
+                    masTd.textContent =
+                        mas || "未設定";
+
+                    // 操作
+                    const actionTd =
+                        document.createElement(
+                            "td"
+                        );
+
+                    actionTd.style.whiteSpace =
+                        "nowrap";
+
+                    const editButton =
+                        document.createElement(
+                            "button"
+                        );
+
+                    editButton.type =
+                        "button";
+
+                    editButton.className =
+                        "action-btn edit-btn";
+
+                    editButton.textContent =
+                        "編輯";
+
+                    editButton.addEventListener(
+                        "click",
+                        function() {
+                            editUserStock(
+                                stock
+                            );
+                        }
+                    );
+
+                    const deleteButton =
+                        document.createElement(
+                            "button"
+                        );
+
+                    deleteButton.type =
+                        "button";
+
+                    deleteButton.className =
+                        "action-btn delete-btn";
+
+                    deleteButton.textContent =
+                        "刪除";
+
+                    deleteButton.addEventListener(
+                        "click",
+                        function() {
+                            deleteUserStock(
+                                stock,
+                                deleteButton
+                            );
+                        }
+                    );
+
+                    actionTd.appendChild(
+                        editButton
+                    );
+
+                    actionTd.appendChild(
+                        deleteButton
+                    );
+
+                    tr.appendChild(numberTd);
+                    tr.appendChild(tickerTd);
+                    tr.appendChild(groupTd);
+                    tr.appendChild(masTd);
+                    tr.appendChild(actionTd);
+
+                    tbody.appendChild(tr);
+                }
+            );
         }
 
+        // =====================================================
+        // 清除搜尋
+        // =====================================================
         function clearStockSearch() {
             document.getElementById(
                 "stock-search"
@@ -753,6 +1005,9 @@
             renderStockList();
         }
 
+        // =====================================================
+        // 進入編輯模式
+        // =====================================================
         function editUserStock(stock) {
             const mas = [
                 stock.ma1,
@@ -760,16 +1015,24 @@
                 stock.ma3,
                 stock.ma4
             ]
-                .filter(num => Number(num) > 0)
+                .filter(
+                    num => Number(num) > 0
+                )
                 .join(",");
 
+            editingStockId = stock.id;
             editingTicker = stock.ticker;
+            editingOriginalGroupId =
+                stock.group_id;
 
-            const tickerInput = document.getElementById(
-                "reg-ticker"
-            );
+            const tickerInput =
+                document.getElementById(
+                    "reg-ticker"
+                );
 
-            tickerInput.value = stock.ticker;
+            tickerInput.value =
+                stock.ticker;
+
             tickerInput.disabled = true;
 
             document.getElementById(
@@ -783,7 +1046,8 @@
             document.getElementById(
                 "user-panel-title"
             ).innerText =
-                "✏️ 修改我的自選股：" + stock.ticker;
+                "✏️ 修改我的自選股：" +
+                stock.ticker;
 
             document.getElementById(
                 "editing-message"
@@ -795,7 +1059,8 @@
 
             document.getElementById(
                 "save-user-stock-btn"
-            ).innerText = "儲存修改";
+            ).innerText =
+                "儲存修改";
 
             document.getElementById(
                 "user-panel"
@@ -805,12 +1070,18 @@
             });
         }
 
+        // =====================================================
+        // 取消編輯
+        // =====================================================
         function cancelEditStock() {
+            editingStockId = null;
             editingTicker = null;
+            editingOriginalGroupId = null;
 
-            const tickerInput = document.getElementById(
-                "reg-ticker"
-            );
+            const tickerInput =
+                document.getElementById(
+                    "reg-ticker"
+                );
 
             tickerInput.disabled = false;
             tickerInput.value = "";
@@ -834,51 +1105,69 @@
 
             document.getElementById(
                 "save-user-stock-btn"
-            ).innerText = "儲存自選股設定";
+            ).innerText =
+                "儲存自選股設定";
         }
 
+        // =====================================================
+        // 均線參數驗證
+        // =====================================================
         function parseMovingAverages(value) {
             const masStr = value.trim();
 
             if (!masStr) {
                 return {
                     success: false,
-                    message: "請填寫均線參數！"
+                    message:
+                        "請填寫均線參數！"
                 };
             }
 
-            const rawValues = masStr
-                .split(",")
-                .map(item => item.trim());
+            const rawValues =
+                masStr
+                    .split(",")
+                    .map(
+                        item =>
+                            item.trim()
+                    );
 
             if (rawValues.length > 4) {
                 return {
                     success: false,
-                    message: "均線參數最多只能設定 4 組！"
+                    message:
+                        "均線參數最多只能設定 4 組！"
                 };
             }
 
-            if (rawValues.some(item => item === "")) {
+            if (
+                rawValues.some(
+                    item => item === ""
+                )
+            ) {
                 return {
                     success: false,
-                    message: "均線格式不正確，請使用逗號分隔，例如：20,60,120"
+                    message:
+                        "均線格式不正確，請使用逗號分隔，例如：20,60,120"
                 };
             }
 
-            const masArray = rawValues.map(Number);
+            const masArray =
+                rawValues.map(Number);
 
-            const hasInvalidValue = masArray.some(num => {
-                return (
-                    !Number.isInteger(num) ||
-                    num <= 0 ||
-                    num > 1000
-                );
-            });
+            const hasInvalidValue =
+                masArray.some(num => {
+                    return (
+                        !Number.isInteger(num) ||
+                        num <= 0 ||
+                        num > 1000
+                    );
+                });
 
             if (hasInvalidValue) {
                 return {
                     success: false,
-                    message: "均線必須是 1～1000 的正整數！"
+                    message:
+                        "均線必須是 1～1000 的正整數！"
                 };
             }
 
@@ -888,7 +1177,8 @@
             ) {
                 return {
                     success: false,
-                    message: "均線參數不可重複！"
+                    message:
+                        "均線參數不可重複！"
                 };
             }
 
@@ -898,54 +1188,75 @@
             };
         }
 
+        // =====================================================
+        // 儲存或修改使用者自選股
+        // =====================================================
         async function saveUserStock() {
             if (!_supabase) {
-                return alert("Supabase 未就緒！");
+                return alert(
+                    "Supabase 未就緒！"
+                );
             }
 
-            const saveButton = document.getElementById(
-                "save-user-stock-btn"
-            );
+            const saveButton =
+                document.getElementById(
+                    "save-user-stock-btn"
+                );
 
-            const tickerInput = document.getElementById(
-                "reg-ticker"
-            );
+            const tickerInput =
+                document.getElementById(
+                    "reg-ticker"
+                );
 
-            let ticker = tickerInput.value
-                .trim()
-                .toUpperCase();
+            const ticker =
+                tickerInput.value
+                    .trim()
+                    .toUpperCase();
 
-            let groupId = document.getElementById(
-                "reg-group"
-            ).value;
+            const groupId =
+                document.getElementById(
+                    "reg-group"
+                ).value;
 
-            let masStr = document.getElementById(
-                "reg-mas"
-            ).value.trim();
+            const masStr =
+                document.getElementById(
+                    "reg-mas"
+                ).value.trim();
 
             if (!ticker || !masStr) {
-                return alert("請填寫代號與均線！");
+                return alert(
+                    "請填寫代號與均線！"
+                );
             }
 
-            const tickerPattern = /^[A-Z0-9.^_-]{1,30}$/;
+            const tickerPattern =
+                /^[A-Z0-9.^_-]{1,30}$/;
 
-            if (!tickerPattern.test(ticker)) {
+            if (
+                !tickerPattern.test(ticker)
+            ) {
                 return alert(
                     "股票代號格式不正確，請確認後再試。"
                 );
             }
 
             const maResult =
-                parseMovingAverages(masStr);
+                parseMovingAverages(
+                    masStr
+                );
 
             if (!maResult.success) {
-                return alert(maResult.message);
+                return alert(
+                    maResult.message
+                );
             }
 
-            const masArray = maResult.values;
+            const masArray =
+                maResult.values;
 
             const saveData = {
-                line_user_id: currentUserId,
+                line_user_id:
+                    currentUserId,
                 ticker: ticker,
                 group_id: groupId,
                 ma1: masArray[0] || 0,
@@ -954,25 +1265,60 @@
                 ma4: masArray[3] || 0
             };
 
+            const isEditing =
+                editingStockId !== null;
+
             try {
                 saveButton.disabled = true;
-                saveButton.innerText = editingTicker
-                    ? "修改中..."
-                    : "儲存中...";
+
+                saveButton.innerText =
+                    isEditing
+                        ? "修改中..."
+                        : "儲存中...";
 
                 // 瀏覽器測試模式
                 if (
                     currentUserId ===
                     "BROWSER_TEST_USER"
                 ) {
-                    const existingIndex =
-                        allUserStocks.findIndex(
-                            stock =>
-                                stock.ticker === ticker
-                        );
+                    if (isEditing) {
+                        const duplicateStock =
+                            allUserStocks.find(
+                                stock =>
+                                    stock.id !==
+                                        editingStockId &&
+                                    stock.ticker ===
+                                        ticker &&
+                                    stock.group_id ===
+                                        groupId
+                            );
 
-                    if (existingIndex >= 0) {
-                        allUserStocks[existingIndex] = {
+                        if (duplicateStock) {
+                            throw new Error(
+                                ticker +
+                                " 已經存在於這個群組中。"
+                            );
+                        }
+
+                        const existingIndex =
+                            allUserStocks.findIndex(
+                                stock =>
+                                    stock.id ===
+                                    editingStockId
+                            );
+
+                        if (
+                            existingIndex === -1
+                        ) {
+                            throw new Error(
+                                "找不到要修改的自選股資料。"
+                            );
+                        }
+
+                        allUserStocks[
+                            existingIndex
+                        ] = {
+                            id: editingStockId,
                             ticker: ticker,
                             group_id: groupId,
                             ma1: saveData.ma1,
@@ -981,74 +1327,228 @@
                             ma4: saveData.ma4
                         };
                     } else {
-                        allUserStocks.push({
-                            ticker: ticker,
-                            group_id: groupId,
-                            ma1: saveData.ma1,
-                            ma2: saveData.ma2,
-                            ma3: saveData.ma3,
-                            ma4: saveData.ma4
-                        });
-                    }
+                        const existingStock =
+                            allUserStocks.find(
+                                stock =>
+                                    stock.ticker ===
+                                        ticker &&
+                                    stock.group_id ===
+                                        groupId
+                            );
 
-                    const wasEditing = Boolean(editingTicker);
+                        if (existingStock) {
+                            existingStock.ma1 =
+                                saveData.ma1;
+
+                            existingStock.ma2 =
+                                saveData.ma2;
+
+                            existingStock.ma3 =
+                                saveData.ma3;
+
+                            existingStock.ma4 =
+                                saveData.ma4;
+                        } else {
+                            allUserStocks.push({
+                                id:
+                                    "test-" +
+                                    Date.now() +
+                                    "-" +
+                                    Math.random()
+                                        .toString(36)
+                                        .slice(2),
+                                ticker: ticker,
+                                group_id: groupId,
+                                ma1: saveData.ma1,
+                                ma2: saveData.ma2,
+                                ma3: saveData.ma3,
+                                ma4: saveData.ma4
+                            });
+                        }
+                    }
 
                     cancelEditStock();
                     renderStockList();
 
                     alert(
-                        wasEditing
-                            ? `✅ 修改成功！\n代號: ${ticker}`
-                            : `🎉 儲存成功！\n代號: ${ticker}`
+                        isEditing
+                            ? (
+                                "✅ 修改成功！\n" +
+                                "代號: " +
+                                ticker +
+                                "\n群組: " +
+                                (
+                                    groupNameMap[
+                                        groupId
+                                    ] ||
+                                    groupId
+                                )
+                            )
+                            : (
+                                "🎉 儲存成功！\n" +
+                                "代號: " +
+                                ticker +
+                                "\n群組: " +
+                                (
+                                    groupNameMap[
+                                        groupId
+                                    ] ||
+                                    groupId
+                                )
+                            )
                     );
 
                     return;
                 }
 
-                const { error } = await _supabase
-                    .from("stocks")
-                    .upsert(saveData, {
-                        onConflict:
-                            "line_user_id,ticker"
-                    });
+                if (isEditing) {
+                    // 編輯模式：
+                    // 使用資料 id 精確修改單一資料
+                    const {
+                        data,
+                        error
+                    } = await _supabase
+                        .from("stocks")
+                        .update(saveData)
+                        .eq(
+                            "id",
+                            editingStockId
+                        )
+                        .eq(
+                            "line_user_id",
+                            currentUserId
+                        )
+                        .select("id");
 
-                if (error) {
-                    throw error;
+                    if (error) {
+                        throw error;
+                    }
+
+                    if (
+                        !data ||
+                        data.length === 0
+                    ) {
+                        throw new Error(
+                            "找不到要修改的資料，或沒有修改權限。"
+                        );
+                    }
+                } else {
+                    // 新增模式：
+                    // 同一股票可以存在於不同群組
+                    // 同一使用者＋股票＋群組不重複
+                    const { error } =
+                        await _supabase
+                            .from("stocks")
+                            .upsert(
+                                saveData,
+                                {
+                                    onConflict:
+                                        "line_user_id,ticker,group_id"
+                                }
+                            );
+
+                    if (error) {
+                        throw error;
+                    }
                 }
-
-                const wasEditing = Boolean(editingTicker);
 
                 cancelEditStock();
 
                 alert(
-                    wasEditing
-                        ? `✅ 修改成功！\n代號: ${ticker}`
-                        : `🎉 儲存成功！\n代號: ${ticker}`
+                    isEditing
+                        ? (
+                            "✅ 修改成功！\n" +
+                            "代號: " +
+                            ticker +
+                            "\n群組: " +
+                            (
+                                groupNameMap[
+                                    groupId
+                                ] ||
+                                groupId
+                            )
+                        )
+                        : (
+                            "🎉 儲存成功！\n" +
+                            "代號: " +
+                            ticker +
+                            "\n群組: " +
+                            (
+                                groupNameMap[
+                                    groupId
+                                ] ||
+                                groupId
+                            )
+                        )
                 );
 
                 await fetchUserStocks();
             } catch (error) {
                 console.error(error);
 
+                let message =
+                    error.message ||
+                    "未知錯誤";
+
+                if (
+                    message.includes(
+                        "stocks_line_user_id_ticker_group_key"
+                    ) ||
+                    message.includes(
+                        "duplicate key value"
+                    ) ||
+                    message.includes(
+                        "23505"
+                    )
+                ) {
+                    message =
+                        ticker +
+                        " 已經存在於「" +
+                        (
+                            groupNameMap[
+                                groupId
+                            ] ||
+                            groupId
+                        ) +
+                        "」群組中。";
+                }
+
                 alert(
-                    "❌ 寫入失敗: " +
-                    (error.message || "未知錯誤")
+                    "❌ 寫入失敗：" +
+                    message
                 );
             } finally {
                 saveButton.disabled = false;
 
-                saveButton.innerText = editingTicker
-                    ? "儲存修改"
-                    : "儲存自選股設定";
+                saveButton.innerText =
+                    editingStockId !== null
+                        ? "儲存修改"
+                        : "儲存自選股設定";
             }
         }
 
+        // =====================================================
+        // 精確刪除單一群組中的股票
+        // =====================================================
         async function deleteUserStock(
-            ticker,
+            stock,
             buttonElement
         ) {
+            const groupDisplay =
+                groupNameMap[
+                    stock.group_id
+                ] ||
+                stock.group_id;
+
             const confirmed = confirm(
-                `確定要刪除「${ticker}」嗎？\n刪除後無法復原。`
+                "確定要刪除以下自選股嗎？\n\n" +
+                "股票：" +
+                stock.ticker +
+                "\n" +
+                "群組：" +
+                groupDisplay +
+                "\n\n" +
+                "其他群組中的相同股票不會被刪除。"
             );
 
             if (!confirmed) {
@@ -1062,95 +1562,166 @@
             ) {
                 allUserStocks =
                     allUserStocks.filter(
-                        stock =>
-                            stock.ticker !== ticker
+                        item =>
+                            item.id !==
+                            stock.id
                     );
 
-                if (editingTicker === ticker) {
+                if (
+                    editingStockId ===
+                    stock.id
+                ) {
                     cancelEditStock();
                 }
 
                 renderStockList();
 
-                alert(`✅ 已刪除 ${ticker}`);
+                alert(
+                    "✅ 已刪除\n" +
+                    "股票：" +
+                    stock.ticker +
+                    "\n" +
+                    "群組：" +
+                    groupDisplay
+                );
+
                 return;
             }
 
             if (!_supabase) {
-                alert("Supabase 未就緒！");
+                alert(
+                    "Supabase 未就緒！"
+                );
+
+                return;
+            }
+
+            if (
+                stock.id === undefined ||
+                stock.id === null
+            ) {
+                alert(
+                    "❌ 缺少資料 ID，無法安全刪除。"
+                );
+
                 return;
             }
 
             try {
                 buttonElement.disabled = true;
-                buttonElement.textContent = "刪除中...";
 
-                const { error } = await _supabase
+                buttonElement.textContent =
+                    "刪除中...";
+
+                // 使用 id 精確刪除單一資料
+                const {
+                    data,
+                    error
+                } = await _supabase
                     .from("stocks")
                     .delete()
+                    .eq(
+                        "id",
+                        stock.id
+                    )
                     .eq(
                         "line_user_id",
                         currentUserId
                     )
-                    .eq("ticker", ticker);
+                    .select("id");
 
                 if (error) {
                     throw error;
                 }
 
+                if (
+                    !data ||
+                    data.length === 0
+                ) {
+                    throw new Error(
+                        "找不到要刪除的資料，或沒有刪除權限。"
+                    );
+                }
+
                 allUserStocks =
                     allUserStocks.filter(
-                        stock =>
-                            stock.ticker !== ticker
+                        item =>
+                            item.id !==
+                            stock.id
                     );
 
-                if (editingTicker === ticker) {
+                if (
+                    editingStockId ===
+                    stock.id
+                ) {
                     cancelEditStock();
                 }
 
                 renderStockList();
 
-                alert(`✅ 已刪除 ${ticker}`);
+                alert(
+                    "✅ 已刪除\n" +
+                    "股票：" +
+                    stock.ticker +
+                    "\n" +
+                    "群組：" +
+                    groupDisplay
+                );
             } catch (error) {
                 console.error(error);
 
                 alert(
                     "❌ 刪除失敗：" +
-                    (error.message || "未知錯誤")
+                    (
+                        error.message ||
+                        "未知錯誤"
+                    )
                 );
 
-                buttonElement.disabled = false;
-                buttonElement.textContent = "刪除";
+                buttonElement.disabled =
+                    false;
+
+                buttonElement.textContent =
+                    "刪除";
             }
         }
 
+        // =====================================================
+        // 儲存管理員大盤設定
+        // 原本功能保留
+        // =====================================================
         async function saveAdminStock() {
             if (!_supabase) {
-                return alert("Supabase 未就緒！");
+                return alert(
+                    "Supabase 未就緒！"
+                );
             }
 
-            const saveButton = document.getElementById(
-                "save-admin-stock-btn"
-            );
+            const saveButton =
+                document.getElementById(
+                    "save-admin-stock-btn"
+                );
 
-            // 取得下拉選單元素
-            let selectElement = document.getElementById(
-                "admin-idx-select"
-            );
+            const selectElement =
+                document.getElementById(
+                    "admin-idx-select"
+                );
 
-            let ticker = selectElement.value;
+            const ticker =
+                selectElement.value;
 
-            // 抓取下拉選單中的中文名稱
-            let rawText =
+            const rawText =
                 selectElement.options[
                     selectElement.selectedIndex
                 ].text;
 
-            let cleanName = rawText.split(" (")[0];
+            const cleanName =
+                rawText.split(" (")[0];
 
-            let masStr = document.getElementById(
-                "admin-idx-mas"
-            ).value.trim();
+            const masStr =
+                document.getElementById(
+                    "admin-idx-mas"
+                ).value.trim();
 
             if (!masStr) {
                 return alert(
@@ -1159,15 +1730,19 @@
             }
 
             const maResult =
-                parseMovingAverages(masStr);
+                parseMovingAverages(
+                    masStr
+                );
 
             if (!maResult.success) {
-                return alert(maResult.message);
+                return alert(
+                    maResult.message
+                );
             }
 
-            const masArray = maResult.values;
+            const masArray =
+                maResult.values;
 
-            // 打包資料，保留 name 欄位
             const saveData = {
                 ticker: ticker,
                 name: cleanName,
@@ -1179,22 +1754,34 @@
 
             try {
                 saveButton.disabled = true;
-                saveButton.innerText = "儲存中...";
 
-                const { error } = await _supabase
-                    .from("index_configs")
-                    .upsert(saveData, {
-                        onConflict: "ticker"
-                    });
+                saveButton.innerText =
+                    "儲存中...";
+
+                const { error } =
+                    await _supabase
+                        .from(
+                            "index_configs"
+                        )
+                        .upsert(
+                            saveData,
+                            {
+                                onConflict:
+                                    "ticker"
+                            }
+                        );
 
                 if (error) {
                     throw error;
                 }
 
                 alert(
-                    `👑 大盤參數更新成功！\n` +
-                    `名稱: ${cleanName}\n` +
-                    `代號: ${ticker}`
+                    "👑 大盤參數更新成功！\n" +
+                    "名稱: " +
+                    cleanName +
+                    "\n" +
+                    "代號: " +
+                    ticker
                 );
 
                 document.getElementById(
@@ -1205,10 +1792,15 @@
 
                 alert(
                     "❌ 大盤參數寫入失敗: " +
-                    (error.message || "未知錯誤")
+                    (
+                        error.message ||
+                        "未知錯誤"
+                    )
                 );
             } finally {
-                saveButton.disabled = false;
+                saveButton.disabled =
+                    false;
+
                 saveButton.innerText =
                     "儲存大盤設定";
             }
