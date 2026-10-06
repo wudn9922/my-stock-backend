@@ -26,11 +26,27 @@ app = FastAPI(
 #
 # 保留允許 GitHub Pages、LIFF 與其他前端呼叫的能力。
 # =========================================================
+#
+# 前端沒有使用 cookie，所以不需要 allow_credentials；
+# 「萬用來源 + 允許憑證」是不安全的組合，這裡改為關閉。
+#
+# 若要限制來源，在 Render 設定環境變數：
+# CORS_ORIGINS=https://你的帳號.github.io,https://liff.line.me
+# 未設定時維持原本的「所有來源皆可」行為。
+cors_origins = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        ""
+    ).split(",")
+    if origin.strip()
+] or ["*"]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=cors_origins,
+    allow_credentials=False,
+    allow_methods=["GET", "OPTIONS"],
     allow_headers=["*"],
 )
 
