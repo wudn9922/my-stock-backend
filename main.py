@@ -818,7 +818,10 @@ def analyze_stock(
             "status": status,
             "ma_results": ma_results,
             "score": score,
-            "database_sync": database_sync
+            "database_sync": {
+                "success": database_sync["success"],
+                "action": database_sync["action"]
+            }
         }
 
     except HTTPException as http_error:
@@ -840,9 +843,10 @@ def analyze_stock(
             f"{error}"
         )
 
+        # 完整錯誤只寫入伺服器日誌，不回傳給前端
         raise HTTPException(
             status_code=500,
-            detail=str(error)
+            detail="股票分析失敗，請稍後再試"
         )
 
 
