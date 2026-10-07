@@ -789,9 +789,11 @@
                     ).innerText =
                         "ID: BROWSER_TEST_USER";
 
+                    // 未登入時不顯示管理員面板，
+                    // 避免任何人都能改全域大盤參數
                     document.getElementById(
                         "admin-panel"
-                    ).style.display = "block";
+                    ).style.display = "none";
                 }
             } catch (error) {
                 document.getElementById(
@@ -807,9 +809,10 @@
                 ).innerText =
                     "ID: BROWSER_TEST_USER";
 
+                // LIFF 初始化失敗時同樣不顯示管理員面板
                 document.getElementById(
                     "admin-panel"
-                ).style.display = "block";
+                ).style.display = "none";
             }
 
             await fetchCustomGroups();
@@ -2677,6 +2680,15 @@
         }
 
         async function saveAdminStock() {
+            if (
+                currentUserId !==
+                ADMIN_LINE_ID.trim()
+            ) {
+                return alert(
+                    "僅管理員可修改大盤參數"
+                );
+            }
+
             if (!_supabase) {
                 return alert(
                     "Supabase 未就緒！"
