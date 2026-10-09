@@ -11,205 +11,351 @@
     >
 
     <style>
+        :root {
+            --bg: #0b0f15;
+            --card: #141a23;
+            --card-2: #1a212c;
+            --field: #0f141c;
+            --border: #263040;
+            --border-strong: #33405a;
+            --text: #e8edf4;
+            --muted: #8b97a8;
+            --faint: #5f6b7d;
+            --primary: #3d8bfd;
+            --primary-strong: #2f74e0;
+            --primary-soft: rgba(61, 139, 253, 0.14);
+            --danger: #f0616d;
+            --danger-soft: rgba(240, 97, 109, 0.13);
+            --violet: #b28cff;
+            --violet-soft: rgba(178, 140, 255, 0.14);
+            --green: #2fc28f;
+            --amber: #f5b84a;
+            --radius: 14px;
+            --radius-sm: 10px;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
         body {
-            background-color: #111;
-            color: #fff;
-            font-family: Arial, sans-serif;
             margin: 0;
-            padding: 10px;
+            padding: 16px 14px 32px;
+            background: var(--bg);
+            color: var(--text);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+            font-size: 15px;
+            line-height: 1.5;
+            -webkit-font-smoothing: antialiased;
         }
 
+        .page {
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        /* 頁首 */
         .header {
-            text-align: center;
-            padding: 15px 0;
-            background: #222;
-            margin-bottom: 15px;
-            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            margin-bottom: 14px;
+            background: linear-gradient(135deg, #18233a 0%, #141a23 70%);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
         }
 
+        .header-icon {
+            flex: none;
+            display: grid;
+            place-items: center;
+            width: 44px;
+            height: 44px;
+            border-radius: 12px;
+            background: var(--primary-soft);
+            color: var(--primary);
+            font-size: 22px;
+        }
+
+        .header-text {
+            min-width: 0;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 19px;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .header-status {
+            margin: 3px 0 0;
+            color: var(--text);
+            font-size: 13px;
+            opacity: 0.85;
+        }
+
+        .header-id {
+            margin: 1px 0 0;
+            color: var(--faint);
+            font-size: 11px;
+            word-break: break-all;
+        }
+
+        /* 區塊卡片 */
         .category-box {
-            background: #1a1a1a;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-radius: 8px;
-            border-left: 4px solid #00b0ff;
+            padding: 16px;
+            margin-bottom: 14px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
         }
 
         .category-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+            color: var(--text);
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .title-icon {
+            flex: none;
+            display: grid;
+            place-items: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
             font-size: 15px;
-            font-weight: bold;
-            color: #00ff88;
-            margin-bottom: 10px;
-            padding-left: 5px;
+            background: var(--primary-soft);
+        }
+
+        .accent-violet .title-icon { background: var(--violet-soft); }
+        .accent-green .title-icon { background: rgba(47, 194, 143, 0.14); }
+        .accent-amber .title-icon { background: rgba(245, 184, 74, 0.14); }
+        .accent-red .title-icon { background: var(--danger-soft); }
+
+        .title-flex {
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+
+        .title-main {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* 表單 */
+        .field-label {
+            display: block;
+            margin: 12px 0 6px;
+            color: var(--muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .field-label:first-of-type {
+            margin-top: 0;
         }
 
         .form-input {
             width: 100%;
-            padding: 8px;
-            margin: 5px 0;
-            background: #222;
-            color: #fff;
-            border: 1px solid #444;
-            border-radius: 4px;
-            box-sizing: border-box;
+            min-height: 44px;
+            padding: 10px 12px;
+            margin: 0;
+            background: var(--field);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font: inherit;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.15s, box-shadow 0.15s;
+        }
+
+        .form-input::placeholder {
+            color: var(--faint);
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-soft);
         }
 
         .form-input:disabled {
-            background: #333;
-            color: #aaa;
+            background: #161c26;
+            color: var(--muted);
             cursor: not-allowed;
+        }
+
+        select.form-input {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 36px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%238b97a8' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+        }
+
+        select.form-input option,
+        select.form-input optgroup {
+            background: var(--card);
+            color: var(--text);
+        }
+
+        .field-hint {
+            margin: 6px 2px 0;
+            color: var(--faint);
+            font-size: 12px;
+        }
+
+        /* 按鈕 */
+        .form-btn,
+        .clear-btn,
+        .action-btn,
+        .group-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            border: 1px solid transparent;
+            border-radius: var(--radius-sm);
+            font: inherit;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background-color 0.15s, border-color 0.15s, transform 0.05s;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .form-btn:active,
+        .clear-btn:active,
+        .action-btn:active,
+        .group-action-btn:active {
+            transform: scale(0.98);
         }
 
         .form-btn {
             width: 100%;
-            padding: 10px;
-            font-weight: bold;
-            border: none;
-            border-radius: 4px;
-            margin-top: 10px;
-            cursor: pointer;
+            min-height: 46px;
+            margin-top: 14px;
+            padding: 11px 16px;
+            background: var(--primary);
+            color: #fff;
+            font-size: 15px;
+        }
+
+        .form-btn:hover {
+            background: var(--primary-strong);
+        }
+
+        .form-btn.danger {
+            background: var(--danger);
+        }
+
+        .form-btn.danger:hover {
+            background: #d94f5b;
         }
 
         .form-btn:disabled,
         .action-btn:disabled,
-        .group-action-btn:disabled {
-            opacity: 0.55;
+        .group-action-btn:disabled,
+        .clear-btn:disabled {
+            opacity: 0.5;
             cursor: not-allowed;
-        }
-
-        .stock-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-
-        .stock-table th {
-            background: #222;
-            color: #aaa;
-            padding: 10px;
-            text-align: left;
-            border-bottom: 2px solid #444;
-            white-space: nowrap;
-        }
-
-        .stock-table td {
-            padding: 10px;
-            border-bottom: 1px solid #333;
-            color: #fff;
-        }
-
-        .title-flex {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 10px;
-        }
-
-        .list-toolbar {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            margin: 10px 0;
-        }
-
-        .list-toolbar .form-input {
-            flex: 1;
-            margin: 0;
-        }
-
-        .clear-btn,
-        .action-btn,
-        .group-action-btn {
-            border: none;
-            border-radius: 4px;
-            padding: 7px 10px;
-            font-weight: bold;
-            cursor: pointer;
-            white-space: nowrap;
-        }
-
-        .clear-btn {
-            background: #555;
-            color: #fff;
-        }
-
-        .edit-btn {
-            background: #00b0ff;
-            color: #fff;
-            margin-right: 5px;
-        }
-
-        .delete-btn {
-            background: #ff5252;
-            color: #fff;
+            transform: none;
         }
 
         .cancel-btn {
-            background: #666;
-            color: #fff;
             display: none;
+            margin-top: 8px;
+            background: transparent;
+            border-color: var(--border-strong);
+            color: var(--muted);
         }
 
-        .list-summary {
-            color: #aaa;
-            font-size: 12px;
-            margin: 8px 0 0 2px;
+        .cancel-btn:hover {
+            background: var(--card-2);
         }
 
-        .editing-message {
-            display: none;
-            color: #ffeb3b;
-            background: #2b2a16;
-            border: 1px solid #665f12;
-            border-radius: 4px;
-            padding: 8px;
-            margin-bottom: 8px;
+        .clear-btn {
+            min-height: 44px;
+            padding: 0 14px;
+            background: var(--card-2);
+            border-color: var(--border);
+            color: var(--muted);
+        }
+
+        .action-btn,
+        .group-action-btn {
+            min-height: 34px;
+            padding: 0 12px;
             font-size: 13px;
-            line-height: 1.5;
         }
 
+        .edit-btn,
+        .group-edit-btn {
+            background: var(--primary-soft);
+            color: #8fbaff;
+        }
+
+        .edit-btn:hover,
+        .group-edit-btn:hover {
+            background: rgba(61, 139, 253, 0.24);
+        }
+
+        .delete-btn,
+        .group-delete-btn {
+            background: var(--danger-soft);
+            color: #ff9aa3;
+        }
+
+        .delete-btn:hover,
+        .group-delete-btn:hover {
+            background: rgba(240, 97, 109, 0.22);
+        }
+
+        /* 自訂分組 */
         .group-create-row {
             display: flex;
             gap: 8px;
-            align-items: center;
         }
 
         .group-create-row .form-input {
             flex: 1;
-            margin: 0;
         }
 
         .group-create-button {
             width: auto;
-            min-width: 100px;
+            min-width: 104px;
             margin: 0;
-            background: #ab47bc;
-            color: #fff;
         }
 
         .group-help {
-            color: #999;
+            margin: 10px 2px 0;
+            color: var(--faint);
             font-size: 12px;
-            line-height: 1.5;
-            margin: 9px 2px;
         }
 
         .custom-group-list {
-            margin-top: 12px;
+            display: grid;
+            gap: 8px;
+            margin-top: 14px;
         }
 
         .custom-group-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             gap: 10px;
-            padding: 10px;
-            margin-bottom: 7px;
-            background: #222;
-            border: 1px solid #383838;
-            border-radius: 5px;
+            padding: 12px 12px 12px 14px;
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
         }
 
         .custom-group-info {
@@ -218,77 +364,274 @@
         }
 
         .custom-group-name {
-            color: #e1bee7;
-            font-weight: bold;
+            color: var(--text);
+            font-weight: 700;
             word-break: break-word;
         }
 
+        .custom-group-name::before {
+            content: "";
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            margin-right: 8px;
+            border-radius: 50%;
+            background: var(--violet);
+            vertical-align: 1px;
+        }
+
         .custom-group-count {
-            color: #888;
-            font-size: 11px;
-            margin-top: 4px;
+            margin-top: 2px;
+            color: var(--muted);
+            font-size: 12px;
         }
 
         .custom-group-actions {
             display: flex;
-            gap: 5px;
-        }
-
-        .group-edit-btn {
-            background: #00b0ff;
-            color: #fff;
-        }
-
-        .group-delete-btn {
-            background: #ff5252;
-            color: #fff;
+            gap: 6px;
         }
 
         .empty-group-message {
-            color: #777;
+            padding: 18px;
+            color: var(--faint);
             text-align: center;
-            padding: 15px;
-            border: 1px dashed #444;
-            border-radius: 5px;
+            border: 1px dashed var(--border-strong);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
         }
 
+        /* 編輯提示 */
+        .editing-message {
+            display: none;
+            margin-bottom: 14px;
+            padding: 10px 12px;
+            color: #f8d58a;
+            background: rgba(245, 184, 74, 0.1);
+            border: 1px solid rgba(245, 184, 74, 0.35);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+        }
+
+        /* 自選股清單 */
+        .list-toolbar {
+            display: flex;
+            gap: 8px;
+            margin: 0 0 10px;
+        }
+
+        .list-toolbar .form-input {
+            flex: 1;
+        }
+
+        .list-filter {
+            width: auto;
+            min-width: 150px;
+            min-height: 38px;
+            padding-top: 6px;
+            padding-bottom: 6px;
+            font-size: 13px;
+            font-weight: 500;
+        }
+
+        .list-summary {
+            margin: 0 2px 10px;
+            color: var(--muted);
+            font-size: 12px;
+        }
+
+        .stock-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            font-size: 14px;
+        }
+
+        .stock-table th {
+            padding: 10px 12px;
+            color: var(--muted);
+            font-size: 12px;
+            font-weight: 600;
+            text-align: left;
+            white-space: nowrap;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .stock-table td {
+            padding: 12px;
+            color: var(--text);
+            border-bottom: 1px solid var(--border);
+            vertical-align: middle;
+        }
+
+        .stock-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .stock-table tbody tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .col-no {
+            width: 44px;
+            color: var(--faint);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .col-ticker {
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .group-chip {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            background: var(--primary-soft);
+            color: #8fbaff;
+            font-size: 12px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .group-chip.custom {
+            background: var(--violet-soft);
+            color: #cdb5ff;
+        }
+
+        .ma-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .ma-pill {
+            padding: 2px 8px;
+            border-radius: 6px;
+            background: var(--card-2);
+            border: 1px solid var(--border);
+            color: var(--text);
+            font-size: 12px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .ma-empty {
+            color: var(--faint);
+            font-size: 12px;
+        }
+
+        .col-actions {
+            white-space: nowrap;
+            text-align: right;
+        }
+
+        .col-actions .action-btn + .action-btn {
+            margin-left: 6px;
+        }
+
+        .list-message {
+            padding: 24px 12px !important;
+            color: var(--faint) !important;
+            text-align: center;
+        }
+
+        /* 手機：清單改成卡片 */
         @media (max-width: 600px) {
-            .list-toolbar,
-            .group-create-row {
+            body {
+                padding: 12px 10px 28px;
+            }
+
+            .header h1 {
+                font-size: 17px;
+            }
+
+            .group-create-row,
+            .list-toolbar {
                 flex-direction: column;
-                align-items: stretch;
             }
 
             .group-create-button {
                 width: 100%;
             }
 
-            .stock-table th,
+            .list-filter {
+                width: 100%;
+            }
+
+            .stock-table thead {
+                display: none;
+            }
+
+            .stock-table,
+            .stock-table tbody {
+                display: block;
+            }
+
+            .stock-table tbody tr {
+                display: grid;
+                grid-template-columns: auto 1fr auto;
+                grid-template-areas:
+                    "no ticker group"
+                    "mas mas mas"
+                    "actions actions actions";
+                align-items: center;
+                gap: 8px 10px;
+                padding: 12px;
+                margin-bottom: 8px;
+                background: var(--card-2);
+                border: 1px solid var(--border);
+                border-radius: var(--radius-sm);
+            }
+
+            .stock-table tbody tr:hover td {
+                background: none;
+            }
+
             .stock-table td {
-                padding: 8px 6px;
+                padding: 0;
+                border: none;
+            }
+
+            .stock-table td.list-message {
+                grid-column: 1 / -1;
+            }
+
+            .col-no {
+                grid-area: no;
+                width: auto;
                 font-size: 12px;
             }
 
-            .action-btn {
-                display: block;
-                width: 100%;
-                margin: 3px 0;
+            .col-ticker {
+                grid-area: ticker;
+                font-size: 16px;
             }
 
-            .edit-btn {
-                margin-right: 0;
+            .col-group {
+                grid-area: group;
+                text-align: right;
+            }
+
+            .col-mas {
+                grid-area: mas;
+            }
+
+            .col-actions {
+                grid-area: actions;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 8px;
+            }
+
+            .col-actions .action-btn + .action-btn {
+                margin-left: 0;
             }
 
             .custom-group-item {
-                align-items: flex-start;
                 flex-direction: column;
+                align-items: stretch;
             }
 
-            .custom-group-actions {
-                width: 100%;
-            }
-
-            .group-action-btn {
+            .custom-group-actions .group-action-btn {
                 flex: 1;
             }
         }
@@ -296,42 +639,26 @@
 </head>
 
 <body>
-
+    <div class="page">
     <!-- 頁首 -->
-    <div
-        class="header"
-        style="background: #00b0ff;"
-    >
-        <h2 style="margin: 0; color: #fff;">
-            ⚙️ 自選股均線參數控制台
-        </h2>
-
-        <p
-            id="liff-status"
-            style="margin: 5px 0 0 0; color:#fff; font-size:13px;"
-        >
-            網頁骨架已載入...
-        </p>
-
-        <p
-            id="user-id-display"
-            style="margin: 2px 0 0 0; color:#ffeb3b; font-size:11px;"
-        >
-            正在載入身分識別...
-        </p>
-    </div>
+    <header class="header">
+        <div class="header-icon" aria-hidden="true">⚙️</div>
+        <div class="header-text">
+            <h1>自選股均線參數控制台</h1>
+            <p id="liff-status" class="header-status">
+                網頁骨架已載入...
+            </p>
+            <p id="user-id-display" class="header-id">
+                正在載入身分識別...
+            </p>
+        </div>
+    </header>
 
     <!-- 自訂分組管理 -->
-    <div
-        class="category-box"
-        style="border-left-color: #ab47bc;"
-        id="group-panel"
-    >
-        <div
-            class="category-title"
-            style="color: #e1bee7;"
-        >
-            🗂️ 我的自訂分組
+    <section class="category-box accent-violet" id="group-panel">
+        <div class="category-title">
+            <span class="title-icon" aria-hidden="true">🗂️</span>
+            我的自訂分組
         </div>
 
         <div class="group-create-row">
@@ -339,7 +666,7 @@
                 type="text"
                 id="new-group-name"
                 class="form-input"
-                placeholder="請輸入新分組名稱"
+                placeholder="輸入新分組名稱"
                 maxlength="30"
                 autocomplete="off"
             >
@@ -355,103 +682,67 @@
         </div>
 
         <div class="group-help">
-            每個自訂分組只屬於目前登入的 LINE 使用者。分組內還有股票時，必須先移動或刪除股票，才能刪除該分組。
+            自訂分組只屬於目前登入的 LINE 帳號。分組內還有股票時，需先移動或刪除股票才能刪除分組。
         </div>
 
-        <div
-            id="custom-group-list"
-            class="custom-group-list"
-        >
+        <div id="custom-group-list" class="custom-group-list">
             <div class="empty-group-message">
                 自訂分組載入中...
             </div>
         </div>
-    </div>
+    </section>
 
     <!-- 使用者自選股設定 -->
-    <div
-        class="category-box"
-        style="border-left-color: #00ff88;"
-        id="user-panel"
-    >
-        <div
-            class="category-title"
-            style="color: #00ff88;"
-            id="user-panel-title"
-        >
-            ➕ 新增/修改 我的自選股
+    <section class="category-box accent-green" id="user-panel">
+        <div class="category-title">
+            <span class="title-icon" aria-hidden="true">📈</span>
+            <span id="user-panel-title">新增/修改 我的自選股</span>
         </div>
 
-        <div
-            id="editing-message"
-            class="editing-message"
-        >
+        <div id="editing-message" class="editing-message">
             ✏️ 目前正在編輯這一筆自選股設定。<br>
             股票代號不可修改，但可以修改分組及均線參數。<br>
             修改不會影響其他分組中的相同股票。
         </div>
 
+        <label class="field-label" for="reg-ticker">股票代號</label>
         <input
             type="text"
             id="reg-ticker"
             class="form-input"
-            placeholder="股票代號 (例: 2330.TW)"
+            placeholder="例：2330.TW、AAPL"
             autocomplete="off"
         >
 
-        <select
-            id="reg-group"
-            class="form-input"
-        >
-            <optgroup
-                id="reg-fixed-group-options"
-                label="系統預設分組"
-            >
-                <option value="tw_g1">
-                    🇹🇼 台股 - 權值精選
-                </option>
-
-                <option value="tw_g2">
-                    🇹🇼 台股 - 熱門
-                </option>
-
-                <option value="us_g1">
-                    🇺🇸 美股 - 權值精選
-                </option>
-
-                <option value="us_g2">
-                    🇺🇸 美股 - 低本益比
-                </option>
-
-                <option value="us_g3">
-                    🇺🇸 美股 - 超級績效
-                </option>
-
-                <option value="us_g4">
-                    🇺🇸 美股 - 熱門
-                </option>
+        <label class="field-label" for="reg-group">分組</label>
+        <select id="reg-group" class="form-input">
+            <optgroup id="reg-fixed-group-options" label="系統預設分組">
+                <option value="tw_g1">🇹🇼 台股 - 權值精選</option>
+                <option value="tw_g2">🇹🇼 台股 - 熱門</option>
+                <option value="us_g1">🇺🇸 美股 - 權值精選</option>
+                <option value="us_g2">🇺🇸 美股 - 低本益比</option>
+                <option value="us_g3">🇺🇸 美股 - 超級績效</option>
+                <option value="us_g4">🇺🇸 美股 - 熱門</option>
             </optgroup>
-
-            <optgroup
-                id="reg-custom-group-options"
-                label="我的自訂分組"
-            ></optgroup>
+            <optgroup id="reg-custom-group-options" label="我的自訂分組"></optgroup>
         </select>
 
+        <label class="field-label" for="reg-mas">均線參數</label>
         <input
             type="text"
             id="reg-mas"
             class="form-input"
-            placeholder="均線參數 (用逗號隔開，例: 20,60,120)"
+            placeholder="例：20,60,120"
             autocomplete="off"
+            inputmode="numeric"
         >
+        <div class="field-hint">最多 4 組，用逗號隔開，每組 1～1000 的整數。</div>
 
         <button
             type="button"
             id="save-user-stock-btn"
             onclick="saveUserStock()"
             class="form-btn"
-            style="background: #00ff88; color: #000;"
         >
             儲存自選股設定
         </button>
@@ -464,156 +755,82 @@
         >
             取消編輯
         </button>
-    </div>
+    </section>
 
     <!-- 管理員大盤設定 -->
-    <div
-        class="category-box"
-        style="border-left-color: #ff5252; display: none;"
-        id="admin-panel"
-    >
-        <div
-            class="category-title"
-            style="color: #ff5252;"
-        >
-            👑 全域大盤廣播參數 (僅管理員)
+    <section class="category-box accent-red" style="display: none;" id="admin-panel">
+        <div class="category-title">
+            <span class="title-icon" aria-hidden="true">👑</span>
+            全域大盤廣播參數（僅管理員）
         </div>
 
-        <select
-            id="admin-idx-select"
-            class="form-input"
-            style="font-size: 14px;"
-        >
+        <label class="field-label" for="admin-idx-select">大盤指數</label>
+        <select id="admin-idx-select" class="form-input">
             <optgroup label="🇹🇼 台灣股市">
-                <option value="^TWII">
-                    台灣加權指數 (^TWII)
-                </option>
-
-                <option value="^TWOII">
-                    櫃買指數 (^TWOII)
-                </option>
+                <option value="^TWII">台灣加權指數 (^TWII)</option>
+                <option value="^TWOII">櫃買指數 (^TWOII)</option>
             </optgroup>
-
             <optgroup label="🇺🇸 美國股市">
-                <option value="^GSPC">
-                    標普500 (^GSPC)
-                </option>
-
-                <option value="^IXIC">
-                    那斯達克 (^IXIC)
-                </option>
-
-                <option value="^IXIC">
-                    那斯達克 (^IXIC)
-                </option>
-
-                <option value="^RUT">
-                    羅素2000 (^RUT)
-                </option>
-
-                <option value="^SOX">
-                    費城半導體 (^SOX)
-                </option>
+                <option value="^GSPC">標普500 (^GSPC)</option>
+                <option value="^IXIC">那斯達克 (^IXIC)</option>
+                <option value="^DJI">道瓊工業 (^DJI)</option>
+                <option value="^RUT">羅素2000 (^RUT)</option>
+                <option value="^SOX">費城半導體 (^SOX)</option>
             </optgroup>
-
             <optgroup label="🇪🇺 歐洲股市">
-                <option value="^FCHI">
-                    法國 CAC40 (^FCHI)
-                </option>
-
-                <option value="^FTSE">
-                    英國富時100 (^FTSE)
-                </option>
-
-                <option value="^GDAXI">
-                    德國 DAX (^GDAXI)
-                </option>
+                <option value="^FCHI">法國 CAC40 (^FCHI)</option>
+                <option value="^FTSE">英國富時100 (^FTSE)</option>
+                <option value="^GDAXI">德國 DAX (^GDAXI)</option>
             </optgroup>
-
             <optgroup label="🌏 亞洲股市">
-                <option value="^N225">
-                    日經225 (^N225)
-                </option>
-
-                <option value="^KS11">
-                    韓國 KOSPI (^KS11)
-                </option>
+                <option value="^N225">日經225 (^N225)</option>
+                <option value="^KS11">韓國 KOSPI (^KS11)</option>
             </optgroup>
         </select>
 
+        <label class="field-label" for="admin-idx-mas">均線參數</label>
         <input
             type="text"
             id="admin-idx-mas"
             class="form-input"
-            placeholder="請輸入大盤均線參數 (例: 20,50,200)"
+            placeholder="例：20,50,200"
+            inputmode="numeric"
         >
 
         <button
             type="button"
             id="save-admin-stock-btn"
             onclick="saveAdminStock()"
-            class="form-btn"
-            style="background: #ff5252; color: #fff;"
+            class="form-btn danger"
         >
             儲存大盤設定
         </button>
-    </div>
+    </section>
 
     <!-- 自選股清單 -->
-    <div
-        class="category-box"
-        style="border-left-color: #ffeb3b;"
-        id="stock-list-panel"
-    >
-        <div
-            class="category-title title-flex"
-            style="color: #ffeb3b;"
-        >
-            <span>📋 我的自選股追蹤清單</span>
+    <section class="category-box accent-amber" id="stock-list-panel">
+        <div class="category-title title-flex">
+            <span class="title-main">
+                <span class="title-icon" aria-hidden="true">📋</span>
+                我的自選股清單
+            </span>
 
             <select
                 id="list-filter"
-                class="form-input"
-                style="width: auto; padding: 4px 8px; margin: 0; font-size: 13px;"
+                class="form-input list-filter"
                 onchange="renderStockList()"
+                aria-label="依分組篩選"
             >
-                <option value="all">
-                    👀 顯示全部
-                </option>
-
-                <optgroup
-                    id="filter-fixed-group-options"
-                    label="系統預設分組"
-                >
-                    <option value="tw_g1">
-                        🇹🇼 台股 - 權值
-                    </option>
-
-                    <option value="tw_g2">
-                        🇹🇼 台股 - 熱門
-                    </option>
-
-                    <option value="us_g1">
-                        🇺🇸 美股 - 權值
-                    </option>
-
-                    <option value="us_g2">
-                        🇺🇸 美股 - 低本
-                    </option>
-
-                    <option value="us_g3">
-                        🇺🇸 美股 - 績效
-                    </option>
-
-                    <option value="us_g4">
-                        🇺🇸 美股 - 熱門
-                    </option>
+                <option value="all">全部分組</option>
+                <optgroup id="filter-fixed-group-options" label="系統預設分組">
+                    <option value="tw_g1">🇹🇼 台股 - 權值</option>
+                    <option value="tw_g2">🇹🇼 台股 - 熱門</option>
+                    <option value="us_g1">🇺🇸 美股 - 權值</option>
+                    <option value="us_g2">🇺🇸 美股 - 低本</option>
+                    <option value="us_g3">🇺🇸 美股 - 績效</option>
+                    <option value="us_g4">🇺🇸 美股 - 熱門</option>
                 </optgroup>
-
-                <optgroup
-                    id="filter-custom-group-options"
-                    label="我的自訂分組"
-                ></optgroup>
+                <optgroup id="filter-custom-group-options" label="我的自訂分組"></optgroup>
             </select>
         </div>
 
@@ -622,51 +839,39 @@
                 type="search"
                 id="stock-search"
                 class="form-input"
-                placeholder="搜尋股票代號或分組..."
+                placeholder="搜尋股票代號或分組…"
                 oninput="renderStockList()"
                 autocomplete="off"
             >
 
-            <button
-                type="button"
-                class="clear-btn"
-                onclick="clearStockSearch()"
-            >
+            <button type="button" class="clear-btn" onclick="clearStockSearch()">
                 清除搜尋
             </button>
         </div>
 
-        <div
-            id="list-summary"
-            class="list-summary"
-        >
+        <div id="list-summary" class="list-summary">
             資料載入中...
         </div>
 
-        <div style="overflow-x: auto;">
-            <table class="stock-table">
-                <thead>
-                    <tr>
-                        <th>編號</th>
-                        <th>代碼</th>
-                        <th>分組</th>
-                        <th>參數</th>
-                        <th>操作</th>
-                    </tr>
-                </thead>
-
-                <tbody id="stock-list-body">
-                    <tr>
-                        <td
-                            colspan="5"
-                            style="text-align:center; color:#666;"
-                        >
-                            系統初始化中...
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+        <table class="stock-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>代號</th>
+                    <th>分組</th>
+                    <th>均線參數</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody id="stock-list-body">
+                <tr>
+                    <td colspan="5" class="list-message">
+                        系統初始化中...
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
     </div>
 
     <script>
@@ -1716,9 +1921,7 @@
                 document.createElement("td");
 
             td.colSpan = 5;
-            td.style.textAlign = "center";
-            td.style.color = "#666";
-            td.style.padding = "20px";
+            td.className = "list-message";
             td.textContent = message;
 
             tr.appendChild(td);
@@ -1847,8 +2050,7 @@
                             "td"
                         );
 
-                    numberTd.style.color =
-                        "#888";
+                    numberTd.className = "col-no";
 
                     numberTd.textContent =
                         index + 1;
@@ -1858,11 +2060,7 @@
                             "td"
                         );
 
-                    tickerTd.style.fontWeight =
-                        "bold";
-
-                    tickerTd.style.color =
-                        "#00ff88";
+                    tickerTd.className = "col-ticker";
 
                     tickerTd.textContent =
                         stock.ticker;
@@ -1872,34 +2070,76 @@
                             "td"
                         );
 
-                    groupTd.style.color =
+                    groupTd.className = "col-group";
+
+                    const groupChip =
+                        document.createElement(
+                            "span"
+                        );
+
+                    groupChip.className =
                         isCustomGroupValue(
                             stock.group_id
                         )
-                            ? "#e1bee7"
-                            : "#00b0ff";
+                            ? "group-chip custom"
+                            : "group-chip";
 
-                    groupTd.style.fontSize =
-                        "12px";
-
-                    groupTd.textContent =
+                    groupChip.textContent =
                         groupDisplay;
+
+                    groupTd.appendChild(
+                        groupChip
+                    );
 
                     const masTd =
                         document.createElement(
                             "td"
                         );
 
-                    masTd.textContent =
-                        mas || "未設定";
+                    masTd.className = "col-mas";
+
+                    const maValues = String(mas || "")
+                        .split(",")
+                        .map(value => value.trim())
+                        .filter(Boolean);
+
+                    if (maValues.length) {
+                        const maList =
+                            document.createElement(
+                                "div"
+                            );
+
+                        maList.className = "ma-list";
+
+                        maValues.forEach(value => {
+                            const pill =
+                                document.createElement(
+                                    "span"
+                                );
+
+                            pill.className = "ma-pill";
+                            pill.textContent = "MA" + value;
+                            maList.appendChild(pill);
+                        });
+
+                        masTd.appendChild(maList);
+                    } else {
+                        const empty =
+                            document.createElement(
+                                "span"
+                            );
+
+                        empty.className = "ma-empty";
+                        empty.textContent = "未設定";
+                        masTd.appendChild(empty);
+                    }
 
                     const actionTd =
                         document.createElement(
                             "td"
                         );
 
-                    actionTd.style.whiteSpace =
-                        "nowrap";
+                    actionTd.className = "col-actions";
 
                     const editButton =
                         document.createElement(
@@ -2031,7 +2271,7 @@
             document.getElementById(
                 "user-panel-title"
             ).innerText =
-                "✏️ 修改我的自選股：" +
+                "修改我的自選股：" +
                 stock.ticker;
 
             document.getElementById(
@@ -2075,7 +2315,7 @@
             document.getElementById(
                 "user-panel-title"
             ).innerText =
-                "➕ 新增/修改 我的自選股";
+                "新增/修改 我的自選股";
 
             document.getElementById(
                 "editing-message"
