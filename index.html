@@ -688,20 +688,15 @@
     </script>
 
     <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         /*
-         * 注意：
-         * GitHub Pages 的 HTML 無法讀取 Render Secret。
-         * 這裡保留原本前端 Supabase publishable key，
-         * 並不是 service_role key。
+         * 所有讀寫都經過 Supabase Edge Function user-settings：
+         * 函式先向 LINE 驗證 LIFF ID Token，再只操作該使用者自己的資料。
+         * 資料表不開放瀏覽器直接寫入（瀏覽器無法證明自己是哪個 LINE 使用者）。
          */
-        const SUPABASE_URL =
-            "https://bxhqpfeberqbtxymghyt.supabase.co";
-
-        const SUPABASE_ANON_KEY =
-            "sb_publishable_eEJNM_96jblQ_90vpcYC0g_PzyGJNOK";
+        const SETTINGS_API_URL =
+            "https://bxhqpfeberqbtxymghyt.supabase.co/functions/v1/user-settings";
 
         const LIFF_ID =
             "2010330411-SbwvRXRN";
@@ -709,7 +704,6 @@
         const ADMIN_LINE_ID =
             "Ua0037dbd5037b64fc76804c60520ad76";
 
-        let _supabase;
         let currentUserId = "GUEST";
         let allUserStocks = [];
         let customGroups = [];
@@ -731,19 +725,70 @@
             ...fixedGroupNameMap
         };
 
-        window.onload = async function() {
+        /*
+         * 呼叫 user-settings 函式，回傳 { data, error }（與 supabase-js 相同的形狀）。
+         * error.message 是可以直接顯示給使用者的文字。
+         */
+        async function settingsApi(action, payload = {}) {
             try {
-                _supabase = supabase.createClient(
-                    SUPABASE_URL,
-                    SUPABASE_ANON_KEY
-                );
-            } catch (error) {
-                alert(
-                    "Supabase 連線失敗: " +
-                    error.message
-                );
-            }
+                const idToken = liff.getIDToken();
 
+                if (!idToken) {
+                    throw new Error(
+                        "LINE 登入資訊遺失，請關閉後重新開啟設定頁"
+                    );
+                }
+
+                const response = await fetch(
+                    SETTINGS_API_URL,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            ...payload,
+                            action: action,
+                            idToken: idToken
+                        })
+                    }
+                );
+
+                const result =
+                    await response.json().catch(
+                        () => ({})
+                    );
+
+                if (!response.ok || !result.ok) {
+                    throw new Error(
+                        response.status === 401
+                            ? "LINE 登入已過期，請關閉後重新開啟設定頁"
+                            : (
+                                result.error ||
+                                "伺服器錯誤（HTTP " +
+                                response.status +
+                                "）"
+                            )
+                    );
+                }
+
+                return {
+                    data: result.data ?? null,
+                    error: null
+                };
+            } catch (error) {
+                return {
+                    data: null,
+                    error: {
+                        message:
+                            error.message ||
+                            "連線失敗"
+                    }
+                };
+            }
+        }
+
+        window.onload = async function() {
             try {
                 await liff.init({
                     liffId: LIFF_ID
@@ -911,11 +956,6 @@
         }
 
         async function fetchCustomGroups() {
-            if (!_supabase) {
-                renderCustomGroupList();
-                return;
-            }
-
             if (
                 currentUserId ===
                 "BROWSER_TEST_USER"
@@ -943,21 +983,7 @@
             }
 
             const { data, error } =
-                await _supabase
-                    .from("groups")
-                    .select(
-                        "id, name, line_user_id, ma1, ma2, ma3, ma4"
-                    )
-                    .eq(
-                        "line_user_id",
-                        currentUserId
-                    )
-                    .order(
-                        "created_at",
-                        {
-                            ascending: true
-                        }
-                    );
+                await settingsApi("groups.list");
 
             if (error) {
                 console.error(error);
@@ -1317,28 +1343,10 @@
                     return;
                 }
 
-                if (!_supabase) {
-                    throw new Error(
-                        "Supabase 尚未就緒"
-                    );
-                }
-
                 const { data, error } =
-                    await _supabase
-                        .from("groups")
-                        .insert({
-                            name: groupName,
-                            line_user_id:
-                                currentUserId,
-                            ma1: 5,
-                            ma2: 10,
-                            ma3: 20,
-                            ma4: 60
-                        })
-                        .select(
-                            "id, name, line_user_id, ma1, ma2, ma3, ma4"
-                        )
-                        .single();
+                    await settingsApi("groups.create", {
+                            name: groupName
+                        });
 
                 if (error) {
                     throw error;
@@ -1445,20 +1453,10 @@
                 }
 
                 const { data, error } =
-                    await _supabase
-                        .from("groups")
-                        .update({
+                    await settingsApi("groups.rename", {
+                            id: group.id,
                             name: newName
-                        })
-                        .eq(
-                            "id",
-                            group.id
-                        )
-                        .eq(
-                            "line_user_id",
-                            currentUserId
-                        )
-                        .select("id, name");
+                        });
 
                 if (error) {
                     throw error;
@@ -1569,18 +1567,9 @@
                 }
 
                 const { data, error } =
-                    await _supabase
-                        .from("groups")
-                        .delete()
-                        .eq(
-                            "id",
-                            group.id
-                        )
-                        .eq(
-                            "line_user_id",
-                            currentUserId
-                        )
-                        .select("id");
+                    await settingsApi("groups.delete", {
+                            id: group.id
+                        });
 
                 if (error) {
                     throw error;
@@ -1628,14 +1617,6 @@
         }
 
         async function fetchUserStocks() {
-            if (!_supabase) {
-                showListMessage(
-                    "Supabase 尚未就緒。"
-                );
-
-                return;
-            }
-
             if (
                 currentUserId ===
                 "BROWSER_TEST_USER"
@@ -1701,25 +1682,7 @@
             );
 
             const { data, error } =
-                await _supabase
-                    .from("stocks")
-                    .select(
-                        "id, ticker, group_id, ma1, ma2, ma3, ma4"
-                    )
-                    .eq(
-                        "line_user_id",
-                        currentUserId
-                    )
-                    .neq(
-                        "group_id",
-                        "admin_index"
-                    )
-                    .order(
-                        "ticker",
-                        {
-                            ascending: true
-                        }
-                    );
+                await settingsApi("stocks.list");
 
             if (error) {
                 console.error(error);
@@ -2207,11 +2170,6 @@
         }
 
         async function saveUserStock() {
-            if (!_supabase) {
-                return alert(
-                    "Supabase 未就緒！"
-                );
-            }
 
             const saveButton =
                 document.getElementById(
@@ -2420,18 +2378,12 @@
                     const {
                         data,
                         error
-                    } = await _supabase
-                        .from("stocks")
-                        .update(saveData)
-                        .eq(
-                            "id",
-                            editingStockId
-                        )
-                        .eq(
-                            "line_user_id",
-                            currentUserId
-                        )
-                        .select("id");
+                    } = await settingsApi("stocks.save", {
+                        id: editingStockId,
+                        ticker: ticker,
+                        groupId: groupId,
+                        mas: masArray
+                    });
 
                     if (error) {
                         throw error;
@@ -2447,15 +2399,11 @@
                     }
                 } else {
                     const { error } =
-                        await _supabase
-                            .from("stocks")
-                            .upsert(
-                                saveData,
-                                {
-                                    onConflict:
-                                        "line_user_id,ticker,group_id"
-                                }
-                            );
+                        await settingsApi("stocks.save", {
+                            ticker: ticker,
+                            groupId: groupId,
+                            mas: masArray
+                        });
 
                     if (error) {
                         throw error;
@@ -2582,14 +2530,6 @@
                 return;
             }
 
-            if (!_supabase) {
-                alert(
-                    "Supabase 未就緒！"
-                );
-
-                return;
-            }
-
             if (
                 stock.id === undefined ||
                 stock.id === null
@@ -2610,18 +2550,9 @@
                 const {
                     data,
                     error
-                } = await _supabase
-                    .from("stocks")
-                    .delete()
-                    .eq(
-                        "id",
-                        stock.id
-                    )
-                    .eq(
-                        "line_user_id",
-                        currentUserId
-                    )
-                    .select("id");
+                } = await settingsApi("stocks.delete", {
+                    id: stock.id
+                });
 
                 if (error) {
                     throw error;
@@ -2689,12 +2620,6 @@
                 );
             }
 
-            if (!_supabase) {
-                return alert(
-                    "Supabase 未就緒！"
-                );
-            }
-
             const saveButton =
                 document.getElementById(
                     "save-admin-stock-btn"
@@ -2741,15 +2666,6 @@
             const masArray =
                 maResult.values;
 
-            const saveData = {
-                ticker: ticker,
-                name: cleanName,
-                ma1: masArray[0] || 0,
-                ma2: masArray[1] || 0,
-                ma3: masArray[2] || 0,
-                ma4: masArray[3] || 0
-            };
-
             try {
                 saveButton.disabled = true;
 
@@ -2757,17 +2673,11 @@
                     "儲存中...";
 
                 const { error } =
-                    await _supabase
-                        .from(
-                            "index_configs"
-                        )
-                        .upsert(
-                            saveData,
-                            {
-                                onConflict:
-                                    "ticker"
-                            }
-                        );
+                    await settingsApi("admin.index.save", {
+                        ticker: ticker,
+                        name: cleanName,
+                        mas: masArray
+                    });
 
                 if (error) {
                     throw error;
