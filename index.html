@@ -568,15 +568,14 @@
 
             .stock-table tbody tr {
                 display: grid;
-                grid-template-columns: auto 1fr auto;
+                grid-template-columns: auto minmax(0, 1fr) auto auto;
                 grid-template-areas:
-                    "no ticker group"
-                    "mas mas mas"
-                    "actions actions actions";
+                    "no ticker group actions"
+                    "no mas mas actions";
                 align-items: center;
-                gap: 8px 10px;
-                padding: 12px;
-                margin-bottom: 8px;
+                gap: 4px 10px;
+                padding: 8px 10px;
+                margin-bottom: 6px;
                 background: var(--card-2);
                 border: 1px solid var(--border);
                 border-radius: var(--radius-sm);
@@ -604,11 +603,21 @@
             .col-ticker {
                 grid-area: ticker;
                 font-size: 16px;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .col-group {
                 grid-area: group;
+                min-width: 0;
                 text-align: right;
+            }
+
+            .col-group .group-chip {
+                max-width: 96px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                vertical-align: middle;
             }
 
             .col-mas {
@@ -617,9 +626,14 @@
 
             .col-actions {
                 grid-area: actions;
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 8px;
+                display: flex;
+                flex-direction: column;
+                gap: 4px;
+            }
+
+            .col-actions .action-btn {
+                min-height: 30px;
+                padding: 0 14px;
             }
 
             .col-actions .action-btn + .action-btn {
@@ -734,7 +748,8 @@
             class="form-input"
             placeholder="例：20,60,120"
             autocomplete="off"
-            inputmode="numeric"
+            autocapitalize="off"
+            spellcheck="false"
         >
         <div class="field-hint">最多 4 組，用逗號隔開，每組 1～1000 的整數。</div>
 
@@ -765,7 +780,7 @@
         </div>
 
         <label class="field-label" for="admin-idx-select">大盤指數</label>
-        <select id="admin-idx-select" class="form-input">
+        <select id="admin-idx-select" class="form-input" onchange="fillAdminIndexMas()">
             <optgroup label="🇹🇼 台灣股市">
                 <option value="^TWII">台灣加權指數 (^TWII)</option>
                 <option value="^TWOII">櫃買指數 (^TWOII)</option>
@@ -794,8 +809,11 @@
             id="admin-idx-mas"
             class="form-input"
             placeholder="例：20,50,200"
-            inputmode="numeric"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
         >
+        <div class="field-hint" id="admin-idx-hint">最多 4 組，用逗號隔開，每組 1～1000 的整數。</div>
 
         <button
             type="button"
@@ -912,6 +930,8 @@
         let currentUserId = "GUEST";
         let allUserStocks = [];
         let customGroups = [];
+
+        let adminIndexConfigs = {};
 
         let editingStockId = null;
         let editingTicker = null;
@@ -1065,9 +1085,67 @@
                 ).style.display = "none";
             }
 
+            if (
+                currentUserId ===
+                ADMIN_LINE_ID.trim()
+            ) {
+                fetchAdminIndexConfigs();
+            }
+
             await fetchCustomGroups();
             await fetchUserStocks();
         };
+
+        /*
+         * 大盤參數：把目前雲端已設定的均線帶入輸入框，
+         * 選到尚未設定的指數時留空。
+         */
+        function fillAdminIndexMas() {
+            const select =
+                document.getElementById("admin-idx-select");
+            const input =
+                document.getElementById("admin-idx-mas");
+            const hint =
+                document.getElementById("admin-idx-hint");
+
+            if (!select || !input) {
+                return;
+            }
+
+            const config = adminIndexConfigs[select.value];
+
+            const values = config
+                ? [config.ma1, config.ma2, config.ma3, config.ma4]
+                    .filter(number => Number(number) > 0)
+                : [];
+
+            input.value = values.join(",");
+
+            if (hint) {
+                hint.textContent = values.length
+                    ? "目前已設定：" + values.join(", ") +
+                      "。修改後按儲存即可更新。"
+                    : "此指數尚未設定，請輸入均線（最多 4 組，用逗號隔開）。";
+            }
+        }
+
+        async function fetchAdminIndexConfigs() {
+            const { data, error } =
+                await settingsApi("admin.index.list");
+
+            if (error) {
+                console.warn("讀取大盤參數失敗：", error.message);
+                return;
+            }
+
+            adminIndexConfigs = {};
+
+            (data || []).forEach(row => {
+                adminIndexConfigs[row.ticker] = row;
+            });
+
+            fillAdminIndexMas();
+        }
 
         function getCustomGroupValue(groupId) {
             return "custom_" + String(groupId);
@@ -2343,9 +2421,16 @@
                 };
             }
 
+            // 同時接受全形逗號、頓號、分號與空白當分隔
             const rawValues =
                 masStr
-                    .split(",")
+                    .replace(
+                        /[０-９]/g,
+                        digit => String.fromCharCode(
+                            digit.charCodeAt(0) - 0xFEE0
+                        )
+                    )
+                    .split(/[,，、;；\s]+/)
                     .map(
                         item =>
                             item.trim()
@@ -2931,9 +3016,16 @@
                     ticker
                 );
 
-                document.getElementById(
-                    "admin-idx-mas"
-                ).value = "";
+                adminIndexConfigs[ticker] = {
+                    ticker: ticker,
+                    name: cleanName,
+                    ma1: masArray[0] || 0,
+                    ma2: masArray[1] || 0,
+                    ma3: masArray[2] || 0,
+                    ma4: masArray[3] || 0
+                };
+
+                fillAdminIndexMas();
             } catch (error) {
                 console.error(error);
 
