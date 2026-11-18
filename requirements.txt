@@ -1,6 +1,0 @@
-fastapi
-uvicorn
-gunicorn
-yfinance
-pandas
-requests
